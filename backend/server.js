@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import 'dotenv/config'
 import app from "./src/app.js";
 import { initEmbeddingWorker } from './src/workers/embedding.worker.js';
 import { initClusteringWorker } from './src/workers/clustering.worker.js';
