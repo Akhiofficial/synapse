@@ -81,15 +81,17 @@ export const saveItem = async (req, res) => {
 
     // Step 6: Pinecone Upsert
     try {
-      await pineconeIndex.upsert([{
-        id: newItem._id.toString(),
-        values: embedding,
-        metadata: {
-          title: finalTitle,
-          type,
-          tags: tags.join(', ')
-        }
-      }]);
+      await pineconeIndex.upsert({
+        records: [{
+          id: newItem._id.toString(),
+          values: embedding,
+          metadata: {
+            title: finalTitle,
+            type,
+            tags: tags.join(', ')
+          }
+        }]
+      });
       console.log(`[API:Save] Vector upserted to Pinecone`);
     } catch (pineconeError) {
       console.error('[API:Save] Pinecone Upsert Error:', pineconeError);
