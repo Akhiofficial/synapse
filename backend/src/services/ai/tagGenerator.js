@@ -20,11 +20,11 @@ export const generateTags = async (content, maxRetries = 2) => {
     try {
       console.log(`[Gemini:Tags] Request started (Attempt ${attempt})`);
       const startTime = Date.now();
-      
+
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
-      
+
       const endTime = Date.now();
       console.log(`[Gemini:Tags] Request completed in ${endTime - startTime}ms`);
       console.log(`[Gemini:Tags] API response text:`, text);
@@ -34,11 +34,11 @@ export const generateTags = async (content, maxRetries = 2) => {
       if (parsedTags.length > 0) {
         return parsedTags;
       }
-      
+
       throw new Error("Invalid response format - No valid tags found");
     } catch (error) {
       console.error(`[Gemini:Tags] Error on attempt ${attempt}:`, error);
-      
+
       if (error.status === 429) {
         console.log("[Gemini:Tags] Rate limit (429) hit, waiting 60s...");
         await sleep(60000);
@@ -48,7 +48,7 @@ export const generateTags = async (content, maxRetries = 2) => {
         console.log(`[Gemini:Tags] Retrying...`);
         continue;
       }
-      
+
       // Step 1: No fallback logic as per goal
       throw error;
     }

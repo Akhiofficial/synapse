@@ -1,44 +1,114 @@
 import mongoose from 'mongoose';
 import Item from '../models/Item.js';
-import { queueManager } from '../workers/queue.js';
 import { generateEmbedding } from '../services/ai/embeddingGenerator.js';
 import { generateTags } from '../services/ai/tagGenerator.js';
 import { index as pineconeIndex } from '../config/pinecone.js';
+import { 
+  extractArticle, 
+  extractTweet, 
+  extractYouTube, 
+  extractImage, 
+  extractPDF 
+} from '../services/contentExtractor.js';
+import { normalizeContent } from '../utils/contentNormalizer.js';
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 export const saveItem = async (req, res) => {
   try {
-    const { type, title, content, url, collectionId } = req.body;
+    let { type, title, content, url, collectionId } = req.body;
+    const file = req.file;
 
-    if (!type || !title || !content) {
-      return res.status(400).json({ message: 'Type, title, and content are required' });
+    console.log(`[API:Save] Processing new save request. Type: ${type}, File: ${file ? file.originalname : 'none'}`);
+
+    // Step 2: Content Type Handling & Extraction
+    let extractedData = { title, content };
+
+    if (file) {
+      if (file.mimetype === 'application/pdf') {
+        type = 'pdf';
+        extractedData = await extractPDF(file.buffer, file.originalname);
+      } else if (file.mimetype.startsWith('image/')) {
+        type = 'image';
+        extractedData = extractImage(file);
+      }
+    } else if (type === 'tweet') {
+      extractedData = extractTweet(content || url);
+    } else if (type === 'youtube') {
+      extractedData = extractYouTube(url);
+    } else if (type === 'article' || type === 'text') {
+      type = 'article';
+      extractedData = extractArticle(title, content);
     }
 
-    // 1. Create Basic Item
+    // Step 3: Content Normalization
+    const finalTitle = extractedData.title || title || 'Untitled';
+    const normalizedText = normalizeContent(extractedData.content || content);
+
+    // Step 7: Validation
+    if (!normalizedText || normalizedText.length < 10) {
+      return res.status(400).json({ 
+        message: 'Extracted content is too short or empty. Please provide more detail.' 
+      });
+    }
+
+    console.log(`[API:Save] Extracted content length: ${normalizedText.length}`);
+
+    // Step 4: AI Processing Pipeline (Synchronous)
+    console.log(`[API:Save] Starting AI processing pipeline...`);
+    
+    // 1. Generate Tags
+    const tags = await generateTags(normalizedText);
+    console.log(`[API:Save] Tags generated: ${tags.join(', ')}`);
+
+    // 2. Generate Embedding (Wait is already handled inside the generators)
+    const embedding = await generateEmbedding(normalizedText);
+    console.log(`[API:Save] Embedding generated (Length: ${embedding.length})`);
+
+    // Step 5: Store Data in MongoDB
     const newItem = new Item({
       type,
-      title,
-      content,
+      title: finalTitle,
+      content: normalizedText,
       url,
       collectionId,
-      tags: [], // Will be populated by worker
-      embedding: [], // Will be populated by worker
+      tags,
+      embedding,
     });
 
     await newItem.save();
+    console.log(`[API:Save] Item saved to MongoDB: ${newItem._id}`);
 
-    // 2. Offload AI Processing to Background Worker
-    console.log(`[API:Save] Offloading AI processing for item ${newItem._id} to worker`);
-    queueManager.addJob('embedding', { itemId: newItem._id });
+    // Step 6: Pinecone Upsert
+    try {
+      await pineconeIndex.upsert([{
+        id: newItem._id.toString(),
+        values: embedding,
+        metadata: {
+          title: finalTitle,
+          type,
+          tags: tags.join(', ')
+        }
+      }]);
+      console.log(`[API:Save] Vector upserted to Pinecone`);
+    } catch (pineconeError) {
+      console.error('[API:Save] Pinecone Upsert Error:', pineconeError);
+      // We don't fail the whole request if Pinecone fails, but we log it
+    }
 
     res.status(201).json({
-      message: 'Item saved. AI processing (tags/embeddings) started in background.',
-      item: newItem,
+      message: 'Item saved and processed successfully',
+      item: {
+        id: newItem._id,
+        type,
+        title: finalTitle,
+        tags
+      }
     });
+
   } catch (error) {
-    console.error('Save Item error:', error);
-    res.status(500).json({ message: 'Error saving item', error: error.message });
+    console.error('[API:Save] Error:', error);
+    res.status(500).json({ message: 'Error processing content', error: error.message });
   }
 };
 
