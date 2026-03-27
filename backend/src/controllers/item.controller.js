@@ -11,6 +11,8 @@ import {
   extractPDF 
 } from '../services/contentExtractor.js';
 import { normalizeContent } from '../utils/contentNormalizer.js';
+import { runTopicClustering } from '../services/ai/clusteringService.js';
+
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -81,22 +83,24 @@ export const saveItem = async (req, res) => {
 
     // Step 6: Pinecone Upsert
     try {
-      await pineconeIndex.upsert({
-        records: [{
-          id: newItem._id.toString(),
-          values: embedding,
-          metadata: {
-            title: finalTitle,
-            type,
-            tags: tags.join(', ')
-          }
-        }]
-      });
+      await pineconeIndex.upsert([{
+        id: newItem._id.toString(),
+        values: embedding,
+        metadata: {
+          title: finalTitle,
+          type,
+          tags: tags.join(', ')
+        }
+      }]);
       console.log(`[API:Save] Vector upserted to Pinecone`);
     } catch (pineconeError) {
       console.error('[API:Save] Pinecone Upsert Error:', pineconeError);
       // We don't fail the whole request if Pinecone fails, but we log it
     }
+
+    // Step 7: Trigger Topic Clustering (Asynchronous)
+    runTopicClustering().catch(err => console.error('[API:Save] Deferred clustering error:', err));
+
 
     res.status(201).json({
       message: 'Item saved and processed successfully',
@@ -216,5 +220,33 @@ export const getGraphData = async (req, res) => {
     res.json({ nodes, links: [] }); 
   } catch (error) {
     res.status(500).json({ message: 'Error fetching graph data', error: error.message });
+  }
+};
+
+export const getClusters = async (req, res) => {
+  try {
+    const items = await Item.find().sort({ createdAt: -1 });
+    
+    // Group items by topic
+    const clusters = items.reduce((acc, item) => {
+      const topic = item.topic || 'Uncategorized';
+      if (!acc[topic]) {
+        acc[topic] = [];
+      }
+      acc[topic].push(item);
+      return acc;
+    }, {});
+
+    // Format as array of objects
+    const result = Object.entries(clusters).map(([topic, items]) => ({
+      topic,
+      count: items.length,
+      items
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error('Get Clusters error:', error);
+    res.status(500).json({ message: 'Error fetching clusters', error: error.message });
   }
 };

@@ -6,7 +6,8 @@ import {
   getItemById, 
   searchItems, 
   getRelatedItems, 
-  getGraphData 
+  getGraphData,
+  getClusters
 } from '../controllers/item.controller.js';
 
 const router = express.Router();
@@ -25,5 +26,7 @@ router.get('/item/:id', getItemById);
 router.get('/search', searchItems);
 router.get('/related/:id', getRelatedItems);
 router.get('/graph', getGraphData);
+router.get('/clusters', getClusters);
+
 
 export default router;

@@ -28,6 +28,10 @@ const itemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Collection',
   },
+  topic: {
+    type: String,
+    default: 'Uncategorized',
+  },
   createdAt: {
     type: Date,
     default: Date.now,
