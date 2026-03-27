@@ -3,15 +3,16 @@ import Item from '../models/Item.js';
 import { generateEmbedding } from '../services/ai/embeddingGenerator.js';
 import { generateTags } from '../services/ai/tagGenerator.js';
 import { index as pineconeIndex } from '../config/pinecone.js';
-import { 
-  extractArticle, 
-  extractTweet, 
-  extractYouTube, 
-  extractImage, 
-  extractPDF 
+import {
+  extractArticle,
+  extractTweet,
+  extractYouTube,
+  extractImage,
+  extractPDF
 } from '../services/contentExtractor.js';
 import { normalizeContent } from '../utils/contentNormalizer.js';
 import { runTopicClustering } from '../services/ai/clusteringService.js';
+import { cosineSimilarity } from '../utils/similarity.js';
 
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -49,8 +50,8 @@ export const saveItem = async (req, res) => {
 
     // Step 7: Validation
     if (!normalizedText || normalizedText.length < 10) {
-      return res.status(400).json({ 
-        message: 'Extracted content is too short or empty. Please provide more detail.' 
+      return res.status(400).json({
+        message: 'Extracted content is too short or empty. Please provide more detail.'
       });
     }
 
@@ -58,7 +59,7 @@ export const saveItem = async (req, res) => {
 
     // Step 4: AI Processing Pipeline (Synchronous)
     console.log(`[API:Save] Starting AI processing pipeline...`);
-    
+
     // 1. Generate Tags
     const tags = await generateTags(normalizedText);
     console.log(`[API:Save] Tags generated: ${tags.join(', ')}`);
@@ -195,7 +196,7 @@ export const getRelatedItems = async (req, res) => {
       .map(match => match.id);
 
     const relatedItems = await Item.find({ _id: { $in: relatedIds } });
-    
+
     res.json(relatedItems);
   } catch (error) {
     console.error('Related items error:', error);
@@ -205,20 +206,85 @@ export const getRelatedItems = async (req, res) => {
 
 export const getGraphData = async (req, res) => {
   try {
-    const items = await Item.find().select('title type tags');
-    
-    // Nodes
+    // 1. Fetch items with embeddings/metadata (Limit to 100 for performance)
+    const items = await Item.find()
+      .select('title type tags topic embedding')
+      .limit(100);
+
+    // 2. Transform items to nodes
     const nodes = items.map(item => ({
-      id: item._id,
-      label: item.title,
+      id: item._id.toString(),
+      title: item.title,
       type: item.type,
-      tags: item.tags
+      topic: item.topic || "General"
     }));
 
-    // In a real production app, links should be pre-computed by a worker
-    // For now, we return nodes; links can be defined by shared tags locally in frontend
-    res.json({ nodes, links: [] }); 
+    // 3. Compute Edges (Links)
+    const links = [];
+    const SIMILARITY_THRESHOLD = 0.75;
+    const MAX_LINKS_PER_NODE = 5;
+
+    for (let i = 0; i < items.length; i++) {
+      let nodeLinks = [];
+      const item1 = items[i];
+
+      // Ensure item1 has embeddings
+      if (!item1.embedding || item1.embedding.length === 0) continue;
+
+      for (let j = 0; j < items.length; j++) {
+        if (i === j) continue; // Skip self
+
+        const item2 = items[j];
+
+        // Ensure item2 has embeddings
+        if (!item2.embedding || item2.embedding.length === 0) continue;
+
+        // Base Similarity
+        let similarity = cosineSimilarity(item1.embedding, item2.embedding);
+
+        // Optional Boosts
+        // Shared Tags Boost
+        if (item1.tags && item2.tags) {
+          const sharedTags = item1.tags.filter(tag => item2.tags.includes(tag));
+          if (sharedTags.length > 0) {
+            similarity += sharedTags.length * 0.02; // +0.02 per shared tag
+          }
+        }
+
+        // Same Topic Boost
+        if (item1.topic && item2.topic && item1.topic === item2.topic && item1.topic !== 'Uncategorized') {
+          similarity += 0.05;
+        }
+
+        if (similarity > SIMILARITY_THRESHOLD) {
+          nodeLinks.push({
+            source: item1._id.toString(),
+            target: item2._id.toString(),
+            weight: parseFloat(similarity.toFixed(4))
+          });
+        }
+      }
+
+      // Sort by weight and limit
+      nodeLinks.sort((a, b) => b.weight - a.weight);
+      const topLinks = nodeLinks.slice(0, MAX_LINKS_PER_NODE);
+
+      // Add to main links array, avoiding duplicates (A->B and B->A)
+      topLinks.forEach(link => {
+        const reverseExists = links.find(l => 
+          (l.source === link.target && l.target === link.source) || 
+          (l.source === link.source && l.target === link.target)
+        );
+        if (!reverseExists) {
+          links.push(link);
+        }
+      });
+    }
+
+    console.log(`[API:Graph] Generated ${nodes.length} nodes and ${links.length} links.`);
+    res.json({ nodes, links });
   } catch (error) {
+    console.error('[API:Graph] Error:', error);
     res.status(500).json({ message: 'Error fetching graph data', error: error.message });
   }
 };
@@ -226,7 +292,7 @@ export const getGraphData = async (req, res) => {
 export const getClusters = async (req, res) => {
   try {
     const items = await Item.find().sort({ createdAt: -1 });
-    
+
     // Group items by topic
     const clusters = items.reduce((acc, item) => {
       const topic = item.topic || 'Uncategorized';
