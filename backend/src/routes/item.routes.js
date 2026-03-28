@@ -9,7 +9,8 @@ import {
   getGraphData,
   getClusters,
   debugPinecone,
-  syncPinecone
+  syncPinecone,
+  getResurfaceItems
 } from '../controllers/item.controller.js';
 
 const router = express.Router();
@@ -26,6 +27,7 @@ router.post('/save', upload.single('file'), saveItem);
 router.get('/items', getAllItems);
 router.get('/item/:id', getItemById);
 router.get('/search', searchItems);
+router.get('/resurface', getResurfaceItems);
 router.get('/related/:id', getRelatedItems);
 router.get('/graph', getGraphData);
 router.get('/clusters', getClusters);

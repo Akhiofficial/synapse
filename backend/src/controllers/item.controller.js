@@ -719,4 +719,92 @@ export const syncPinecone = async (req, res) => {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FR7 — Memory Resurfacing
+// GET /api/resurface
+// ─────────────────────────────────────────────────────────────────────────────
+export const getResurfaceItems = async (req, res) => {
+  try {
+    const defaultDaysAgo = 7;
+    let oldThreshold = new Date();
+    oldThreshold.setDate(oldThreshold.getDate() - defaultDaysAgo);
 
+    console.log(`[API:Resurface] Finding items older than ${defaultDaysAgo} days.`);
+    
+    // 1. Fetch items older than the threshold
+    let items = await Item.find({
+      createdAt: { $lt: oldThreshold }
+    }).select('title type createdAt tags url topic').lean();
+
+    // Strategy 2: If we don't have enough old items (new user, test data), gracefully decay the threshold
+    if (items.length < 3) {
+      console.log(`[API:Resurface] Very few / no old items found. Applying 1-day fallback.`);
+      const fallbackThreshold = new Date();
+      fallbackThreshold.setDate(fallbackThreshold.getDate() - 1);
+      
+      items = await Item.find({
+        createdAt: { $lt: fallbackThreshold }
+      }).select('title type createdAt tags url topic').lean();
+    }
+    
+    // Strategy 3: Development / New User Fallback (Ensure results aren't empty for demo)
+    if (items.length < 3) {
+      console.log(`[API:Resurface] Still too few items. Fetching latest items just to avoid empty results.`);
+      items = await Item.find().sort({ createdAt: 1 }).limit(5).select('title type createdAt tags url topic').lean();
+    }
+    
+    // If absolutely zero items exist in DB
+    if (items.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    // 2. Randomize results (Shuffle items)
+    const shuffledItems = items.sort(() => 0.5 - Math.random());
+    
+    // Pick 3 - 5 items randomly
+    const count = Math.min(items.length, Math.floor(Math.random() * 3) + 3); // 3, 4, or 5
+    const selectedItems = shuffledItems.slice(0, count);
+
+    // 3. Add context messages
+    const now = new Date();
+    
+    const results = selectedItems.map(item => {
+      // Calculate time difference in days
+      const createdAt = new Date(item.createdAt);
+      const diffDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+      
+      let message = "";
+      if (diffDays >= 365) {
+        const years = Math.floor(diffDays / 365);
+        message = `You saved this ${years} year${years > 1 ? 's' : ''} ago`;
+      } else if (diffDays >= 30) {
+        const months = Math.floor(diffDays / 30);
+        message = `From ${months} month${months > 1 ? 's' : ''} ago`;
+      } else if (diffDays >= 14) {
+        message = `From a couple of weeks ago`;
+      } else if (diffDays >= 7) {
+        message = "From last week";
+      } else if (diffDays > 0) {
+        message = `You saved this ${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      } else {
+        message = "Revisit this recent insight";
+      }
+      
+      return {
+        _id: item._id,
+        title: item.title,
+        type: item.type,
+        tags: item.tags,
+        url: item.url,
+        createdAt: item.createdAt,
+        message: message
+      };
+    });
+
+    res.status(200).json(results);
+    
+  } catch (error) {
+    console.error('[API:Resurface] Error:', error);
+    res.status(500).json({ message: 'Error fetching resurface items', error: error.message });
+  }
+};
