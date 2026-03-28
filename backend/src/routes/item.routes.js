@@ -7,7 +7,9 @@ import {
   searchItems, 
   getRelatedItems, 
   getGraphData,
-  getClusters
+  getClusters,
+  debugPinecone,
+  syncPinecone
 } from '../controllers/item.controller.js';
 
 const router = express.Router();
@@ -27,6 +29,10 @@ router.get('/search', searchItems);
 router.get('/related/:id', getRelatedItems);
 router.get('/graph', getGraphData);
 router.get('/clusters', getClusters);
+
+// ── Diagnostic & Repair ──────────────────────────────────────────────────────
+router.get('/debug/pinecone', debugPinecone);   // inspect sync state
+router.post('/sync/pinecone', syncPinecone);    // re-upsert all items to Pinecone
 
 
 export default router;
