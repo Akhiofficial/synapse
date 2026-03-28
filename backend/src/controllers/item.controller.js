@@ -378,23 +378,34 @@ export const getRelatedItems = async (req, res) => {
 
 export const getGraphData = async (req, res) => {
   try {
-    // 1. Fetch items with embeddings/metadata (Limit to 100 for performance)
-    const items = await Item.find()
-      .select('title type tags topic embedding')
-      .limit(100);
+    const { limit = 50, topic, type } = req.query;
+    
+    // Construct filter based on query params
+    const filter = {};
+    if (topic) filter.topic = { $regex: topic, $options: 'i' };
+    if (type) filter.type = type;
+
+    // 1. Fetch items with embeddings/metadata
+    const reqLimit = Math.min(parseInt(limit, 10), 150); // Hard cap to prevent memory issues
+    const items = await Item.find(filter)
+      .select('title type tags topic embedding createdAt')
+      .limit(reqLimit);
 
     // 2. Transform items to nodes
     const nodes = items.map(item => ({
       id: item._id.toString(),
       title: item.title,
       type: item.type,
-      topic: item.topic || "General"
+      topic: item.topic || "General",
+      tags: item.tags || [],
+      createdAt: item.createdAt,
+      group: item.topic || "General"
     }));
 
     // 3. Compute Edges (Links)
     const links = [];
-    const SIMILARITY_THRESHOLD = 0.75;
-    const MAX_LINKS_PER_NODE = 5;
+    const SIMILARITY_THRESHOLD = 0.70; // lowered slightly to capture more latent connections
+    const MAX_LINKS_PER_NODE = 3; // reduced from 5 to prevent visual clutter
 
     for (let i = 0; i < items.length; i++) {
       let nodeLinks = [];
@@ -432,7 +443,8 @@ export const getGraphData = async (req, res) => {
           nodeLinks.push({
             source: item1._id.toString(),
             target: item2._id.toString(),
-            weight: parseFloat(similarity.toFixed(4))
+            weight: parseFloat(similarity.toFixed(4)),
+            type: "semantic" // edge type
           });
         }
       }
@@ -453,7 +465,7 @@ export const getGraphData = async (req, res) => {
       });
     }
 
-    console.log(`[API:Graph] Generated ${nodes.length} nodes and ${links.length} links.`);
+    console.log(`[API:Graph] Generated ${nodes.length} nodes and ${links.length} links with filter: ${JSON.stringify(filter)}, limit: ${reqLimit}`);
     res.json({ nodes, links });
   } catch (error) {
     console.error('[API:Graph] Error:', error);
