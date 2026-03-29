@@ -6,13 +6,24 @@ import { useItemDetail } from '../hooks/useItemDetail';
 import ItemContent from '../components/ItemDetail/ItemContent';
 import AISummary from '../components/ItemDetail/AISummary';
 import RelatedInsights from '../components/ItemDetail/RelatedInsights';
+import PersonalNotesSidebar from '../components/ItemDetail/PersonalNotesSidebar';
 import PersonalSynthesis from '../components/ItemDetail/PersonalSynthesis';
 import { DashboardProvider } from '../store/DashboardContext';
 
 const ItemDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { item, relatedItems, loading, error, loadItemDetail } = useItemDetail();
+  const { 
+    item, 
+    highlights, 
+    relatedItems, 
+    loading, 
+    error, 
+    loadItemDetail,
+    addHighlight,
+    removeHighlight,
+    editHighlight
+  } = useItemDetail();
 
   useEffect(() => {
     if (id) {
@@ -65,13 +76,22 @@ const ItemDetailContent = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
           {/* Main Content Column */}
-          <div className="xl:col-span-8">
-            <ItemContent item={item} />
+          <div className="xl:col-span-8 flex flex-col gap-12">
+            <ItemContent 
+              item={item} 
+              highlights={highlights}
+              onAddHighlight={addHighlight}
+            />
             <PersonalSynthesis />
           </div>
 
           {/* Sidebar Column */}
           <div className="xl:col-span-4 flex flex-col gap-12">
+            <PersonalNotesSidebar 
+              highlights={highlights}
+              onDelete={removeHighlight}
+              onEdit={editHighlight}
+            />
             <AISummary summary={item.metadata?.summary} />
             <RelatedInsights items={relatedItems} />
           </div>

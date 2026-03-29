@@ -23,3 +23,24 @@ export const fetchRelatedItems = async (id) => {
   const response = await api.get(`/related/${id}`);
   return response.data;
 };
+
+// Highlights
+export const fetchHighlights = async (itemId) => {
+  const response = await api.get(`/highlights/${itemId}`);
+  return response.data;
+};
+
+export const addHighlight = async (highlightData) => {
+  const response = await api.post('/highlights', highlightData);
+  return response.data;
+};
+
+export const deleteHighlight = async (id) => {
+  const response = await api.delete(`/highlights/${id}`);
+  return response.data;
+};
+
+export const updateHighlight = async (id, data) => {
+  const response = await api.put(`/highlights/${id}`, data);
+  return response.data;
+};

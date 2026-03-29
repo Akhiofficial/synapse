@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import HighlightTrigger from './HighlightTrigger';
 
-const ItemContent = ({ item }) => {
+const ItemContent = ({ item, highlights, onAddHighlight }) => {
   const { type, title, content, metadata, createdAt, tags } = item;
+  const contentRef = useRef(null);
+  const [selection, setSelection] = useState(null);
 
   const formatDate = (date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -16,6 +19,99 @@ const ItemContent = ({ item }) => {
     const words = text.split(/\s+/).length;
     return `${Math.ceil(words / 200)} min read`;
   };
+
+  const handleMouseUp = () => {
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      const text = sel.toString().trim();
+      if (text && contentRef.current.contains(sel.anchorNode)) {
+        const range = sel.getRangeAt(0);
+        setSelection({ text, range });
+      } else {
+        setSelection(null);
+      }
+    } else {
+      setSelection(null);
+    }
+  };
+
+  // Clear selection on clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (selection && !e.target.closest('.highlight-trigger')) {
+        // We delay clearing to allow the trigger buttons to work
+        setTimeout(() => {
+          if (!window.getSelection().toString()) {
+            setSelection(null);
+          }
+        }, 100);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [selection]);
+
+  const handleAddHighlight = async (text) => {
+    await onAddHighlight(text);
+    setSelection(null);
+    window.getSelection().removeAllRanges();
+  };
+
+  const handleAddNote = (text) => {
+    // For now, we'll just add the highlight and let the user edit the note in the sidebar
+    // This matches the "bioluminescent" flow of "Add then Refine"
+    onAddHighlight(text, "Drafting neural connection...");
+    setSelection(null);
+    window.getSelection().removeAllRanges();
+  };
+
+  // Function to render content with highlights
+  const renderContent = useCallback(() => {
+    if (!content) return "No detailed content extracted yet. Sync with your synaptic processor to reveal the depth.";
+    
+    if (!highlights || highlights.length === 0) return content;
+
+    // Build a regex to match all highlighted texts
+    // We sort by length descending to handle overlapping highlights (naive approach)
+    const sortedHighlights = [...highlights].sort((a, b) => b.text.length - a.text.length);
+    let parts = [content];
+
+    sortedHighlights.forEach(h => {
+      const newParts = [];
+      parts.forEach(part => {
+        if (typeof part !== 'string') {
+          newParts.push(part);
+          return;
+        }
+
+        const index = part.indexOf(h.text);
+        if (index !== -1) {
+          if (index > 0) newParts.push(part.substring(0, index));
+          newParts.push(
+            <mark 
+              key={`${h._id}-${index}`} 
+              className="bg-brand-orange/20 text-inherit border-b-2 border-brand-orange/40 transition-all hover:bg-brand-orange/40 hover:border-brand-orange cursor-pointer px-1 rounded-sm relative group/highlight"
+            >
+              {h.text}
+              {h.note && (
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-brand-black/90 backdrop-blur-md border border-white/10 rounded-lg text-[10px] text-white/80 opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
+                  {h.note}
+                </span>
+              )}
+            </mark>
+          );
+          if (index + h.text.length < part.length) {
+            newParts.push(part.substring(index + h.text.length));
+          }
+        } else {
+          newParts.push(part);
+        }
+      });
+      parts = newParts;
+    });
+
+    return parts;
+  }, [content, highlights]);
 
   return (
     <div className="flex flex-col">
@@ -55,17 +151,19 @@ const ItemContent = ({ item }) => {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative group">
-        <button className="absolute -top-4 right-8 z-10 bg-brand-orange text-white px-6 py-3 rounded-full font-display font-bold text-sm shadow-lg shadow-brand-orange/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
-          <span className="material-symbols-outlined text-lg">edit</span>
-          Add Highlight
-        </button>
+      <div className="relative group/container" ref={contentRef} onMouseUp={handleMouseUp}>
+        <HighlightTrigger 
+          selection={selection} 
+          onHighlight={handleAddHighlight}
+          onAddNote={handleAddNote}
+          containerRef={contentRef}
+        />
 
         <div className="glass-card p-12 md:p-16 border border-white/5 relative overflow-hidden">
           {/* Content Body */}
           <div className="prose prose-invert prose-orange max-w-none">
-            <div className="text-xl md:text-2xl font-body leading-relaxed text-on-surface-variant font-light first-letter:text-5xl first-letter:font-display first-letter:font-bold first-letter:text-brand-orange first-letter:mr-3 first-letter:float-left">
-              {content || "No detailed content extracted yet. Sync with your synaptic processor to reveal the depth."}
+            <div className="text-xl md:text-2xl font-body leading-relaxed text-on-surface-variant font-light first-letter:text-5xl first-letter:font-display first-letter:font-bold first-letter:text-brand-orange first-letter:mr-3 first-letter:float-left whitespace-pre-wrap selection:bg-brand-orange/30">
+              {renderContent()}
             </div>
             
             {/* Visual Assets if any */}
