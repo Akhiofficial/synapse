@@ -1,5 +1,6 @@
 import React from 'react';
 import { Brain } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
@@ -21,8 +22,8 @@ const Navbar = () => {
         </div>
         
         <div className="flex items-center gap-4">
-          <button className="hidden sm:block text-slate-300 font-medium hover:text-white transition-colors">Login</button>
-          <button className="btn-primary">Get Started</button>
+          <Link to="/login" className="hidden sm:block text-slate-300 font-medium hover:text-white transition-colors">Login</Link>
+          <Link to="/signup" className="btn-primary">Get Started</Link>
         </div>
       </div>
     </nav>

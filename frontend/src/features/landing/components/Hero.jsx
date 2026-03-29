@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MousePointer2, Play, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
@@ -13,7 +14,7 @@ const Hero = () => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-orange/10 text-brand-orange font-medium mb-8 border border-brand-orange/20"
         >
           <Sparkles className="w-4 h-4" />
-          <span>V2.5 IS NOW LIVE</span>
+          <span>Synapse is Live</span>
         </motion.div>
         
         <motion.h1
@@ -42,9 +43,9 @@ const Hero = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="flex flex-col sm:flex-row items-center gap-6 justify-center"
         >
-          <button className="btn-primary h-14 px-10 text-lg flex items-center justify-center gap-3">
+          <Link to="/signup" className="btn-primary h-14 px-10 text-lg flex items-center justify-center gap-3">
             Get Started for Free <MousePointer2 className="w-5 h-5" />
-          </button>
+          </Link>
           <button className="btn-secondary h-14 px-10 text-lg flex items-center justify-center gap-3 bg-white/5 border-white/10 hover:bg-white/10">
             <Play className="w-5 h-5 fill-current" /> Watch the Demo
           </button>
