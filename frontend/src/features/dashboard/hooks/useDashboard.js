@@ -18,8 +18,7 @@ export const useDashboard = () => {
   } = context;
 
   const loadDashboardData = useCallback(async () => {
-    // Temporarily disabled to use dummy data exclusively as requested
-    /*
+    // Enabled to use real backend data
     setLoading(true);
     setError(null);
     try {
@@ -35,8 +34,7 @@ export const useDashboard = () => {
     } finally {
       setLoading(false);
     }
-    */
-  }, []);
+  }, [setLoading, setError, setResurfaceItems, setRecentItems]);
 
   return {
     ...state,

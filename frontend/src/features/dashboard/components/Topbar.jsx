@@ -19,11 +19,9 @@ const Topbar = () => {
             Recent
           </button>
           <button className="text-gray-400 hover:text-white transition-opacity text-sm">
-            Pinned
+            Highlights
           </button>
-          <button className="text-gray-400 hover:text-white transition-opacity text-sm">
-            Shared
-          </button>
+         
         </nav>
       </div>
 

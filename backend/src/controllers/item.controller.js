@@ -130,11 +130,18 @@ export const getAllItems = async (req, res) => {
 };
 
 export const getItemById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid item ID format.' });
+  }
+
   try {
-    const item = await Item.findById(req.params.id);
+    const item = await Item.findById(id);
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (error) {
+    console.error('[API:GetItem] Error:', error);
     res.status(500).json({ message: 'Error fetching item', error: error.message });
   }
 };

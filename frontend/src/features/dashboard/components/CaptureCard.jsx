@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CaptureCard = ({ item }) => {
-  const { title, type, content, tags, createdAt, metadata } = item;
+  const navigate = useNavigate();
+  const { _id, title, type, content, tags, createdAt, metadata } = item;
 
   const getIcon = () => {
     switch (type) {
@@ -24,7 +26,10 @@ const CaptureCard = ({ item }) => {
   };
 
   return (
-    <div className="glass-card p-5 mt-5 flex flex-col hover:bg-surface-container-high/60 transition-all duration-300 group cursor-pointer border border-transparent hover:border-brand-orange/20">
+    <div 
+      onClick={() => navigate(`/dashboard/item/${_id}`)}
+      className="glass-card p-5 mt-5 flex flex-col hover:bg-surface-container-high/60 transition-all duration-300 group cursor-pointer border border-transparent hover:border-brand-orange/20"
+    >
       <div className="flex justify-between items-start mb-4">
         <span className="material-symbols-outlined text-brand-orange font-fill-1">{getIcon()}</span>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

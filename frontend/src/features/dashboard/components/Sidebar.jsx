@@ -14,7 +14,7 @@ const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 flex flex-col h-screen w-64 border-r border-white/10 bg-brand-black font-display tracking-tight z-50">
       <div className="p-8">
-        <h1 className="text-2xl font-bold tracking-tighter text-brand-orange">Synapse v2.6</h1>
+        <h1 className="text-2xl font-bold tracking-tighter text-brand-orange">Synapse</h1>
         <p className="text-[10px] text-brand-orange/60 font-bold tracking-widest mt-1 uppercase">Predictive Engine Active</p>
       </div>
 

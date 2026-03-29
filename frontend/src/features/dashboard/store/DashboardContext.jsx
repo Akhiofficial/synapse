@@ -4,8 +4,8 @@ import { dummyResurfaceItems, dummyRecentItems } from '../services/dummyData';
 export const DashboardContext = createContext(null);
 
 export const DashboardProvider = ({ children }) => {
-  const [resurfaceItems, setResurfaceItems] = useState(dummyResurfaceItems);
-  const [recentItems, setRecentItems] = useState(dummyRecentItems);
+  const [resurfaceItems, setResurfaceItems] = useState([]);
+  const [recentItems, setRecentItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
