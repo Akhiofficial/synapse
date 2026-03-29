@@ -1,11 +1,17 @@
 import React from 'react';
-import { BrowserRouter } from 'react-router-dom';
-import AppRoutes from './app.routes';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import LandingPage from '../features/landing/pages/LandingPage';
+import DashboardPage from '../features/dashboard/pages/DashboardPage';
+import CollectionsPage from '../features/collections/pages/CollectionsPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/collections" element={<CollectionsPage />} />
+      </Routes>
     </BrowserRouter>
   );
 }
