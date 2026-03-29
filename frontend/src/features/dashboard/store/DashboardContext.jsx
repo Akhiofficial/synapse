@@ -8,6 +8,7 @@ export const DashboardProvider = ({ children }) => {
   const [recentItems, setRecentItems] = useState(dummyRecentItems);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const value = useMemo(
     () => ({
@@ -19,8 +20,10 @@ export const DashboardProvider = ({ children }) => {
       setLoading,
       error,
       setError,
+      isAddModalOpen,
+      setIsAddModalOpen,
     }),
-    [resurfaceItems, recentItems, loading, error]
+    [resurfaceItems, recentItems, loading, error, isAddModalOpen]
   );
 
   return (

@@ -1,7 +1,8 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
+import { useDashboard } from '../hooks/useDashboard';
 
 const Sidebar = () => {
+  const { setIsAddModalOpen } = useDashboard();
   const navItems = [
     { label: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
     { label: 'Collections', icon: 'folder_open', path: '/collections' },
@@ -13,8 +14,8 @@ const Sidebar = () => {
   return (
     <aside className="fixed left-0 top-0 flex flex-col h-screen w-64 border-r border-white/10 bg-brand-black font-display tracking-tight z-50">
       <div className="p-8">
-        <h1 className="text-2xl font-bold tracking-tighter text-white">Synapse</h1>
-        <p className="text-xs text-on-surface-variant mt-1 opacity-60">AI Second Brain</p>
+        <h1 className="text-2xl font-bold tracking-tighter text-brand-orange">Synapse v2.6</h1>
+        <p className="text-[10px] text-brand-orange/60 font-bold tracking-widest mt-1 uppercase">Predictive Engine Active</p>
       </div>
 
       <nav className="flex-1 px-4 space-y-2">
@@ -37,9 +38,12 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-6">
-        <button className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[0.98] transition-all active:scale-95">
-          <span className="material-symbols-outlined font-fill-1">add_circle</span>
-          New Memory
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[0.98] transition-all active:scale-95"
+        >
+          <span className="material-symbols-outlined font-fill-1">bolt</span>
+          New Neural Link
         </button>
       </div>
 

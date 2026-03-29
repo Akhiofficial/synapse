@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Topbar from '../components/Topbar';
 import ResurfacingSection from '../components/ResurfacingSection';
 import CaptureCard from '../components/CaptureCard';
+import AddContentModal from '../components/AddContentModal';
 import { useDashboard } from '../hooks/useDashboard';
 import { DashboardProvider } from '../store/DashboardContext';
 
@@ -31,6 +32,7 @@ const DashboardContent = () => {
     <div className="bg-brand-black min-h-screen">
       <Sidebar />
       <Topbar />
+      <AddContentModal />
       <main className="ml-64 pt-24 px-8 pb-12">
         {error && (
           <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-center">
