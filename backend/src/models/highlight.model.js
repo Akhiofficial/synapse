@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const highlightSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     itemId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Item",

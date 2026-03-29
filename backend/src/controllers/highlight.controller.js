@@ -14,20 +14,21 @@ export const addHighlight = async (req, res) => {
       return res.status(400).json({ error: "text is required and cannot be empty" });
     }
 
-    // Validate item exists
-    const itemExists = await Item.findById(itemId);
+    // Validate item exists and belongs to user
+    const itemExists = await Item.findOne({ _id: itemId, userId: req.user.id });
     if (!itemExists) {
       return res.status(404).json({ error: "Item not found" });
     }
 
     // Check for duplicate highlight
-    const existingHighlight = await Highlight.findOne({ itemId, text: { $regex: new RegExp(`^${text.trim()}$`, "i") } });
+    const existingHighlight = await Highlight.findOne({ itemId, userId: req.user.id, text: { $regex: new RegExp(`^${text.trim()}$`, "i") } });
     if (existingHighlight) {
        return res.status(409).json({ error: "This exact highlight already exists for this item" });
     }
 
     // Create highlight
     const newHighlight = await Highlight.create({
+      userId: req.user.id,
       itemId,
       text: text.trim(),
       note: note ? note.trim() : "",
@@ -48,7 +49,8 @@ export const getHighlightsByItem = async (req, res) => {
   try {
     const { itemId } = req.params;
     
-    const highlights = await Highlight.find({ itemId }).sort({ createdAt: -1 });
+    // Also ensuring item actually belongs to user implicitly via highlight's ownership
+    const highlights = await Highlight.find({ itemId, userId: req.user.id }).sort({ createdAt: -1 });
     
     // Formatting response to match example (can just return objects normally but keeping clean)
     const formatted = highlights.map(h => ({
@@ -70,7 +72,7 @@ export const deleteHighlight = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const deleted = await Highlight.findByIdAndDelete(id);
+    const deleted = await Highlight.findOneAndDelete({ _id: id, userId: req.user.id });
     if (!deleted) {
        return res.status(404).json({ error: "Highlight not found" });
     }
@@ -95,8 +97,8 @@ export const updateHighlight = async (req, res) => {
     }
     if (note !== undefined) updateData.note = note.trim();
     
-    const updated = await Highlight.findByIdAndUpdate(
-      id,
+    const updated = await Highlight.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
       { $set: updateData },
       { new: true, runValidators: true }
     );

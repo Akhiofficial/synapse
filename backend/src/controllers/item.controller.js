@@ -71,6 +71,7 @@ export const saveItem = async (req, res) => {
 
     // Step 5: Store Data in MongoDB
     const newItem = new Item({
+      userId: req.user.id,
       type,
       title: finalTitle,
       content: normalizedText,
@@ -122,7 +123,7 @@ export const saveItem = async (req, res) => {
 
 export const getAllItems = async (req, res) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 });
+    const items = await Item.find({ userId: req.user.id }).sort({ createdAt: -1 });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching items', error: error.message });
@@ -137,7 +138,7 @@ export const getItemById = async (req, res) => {
   }
 
   try {
-    const item = await Item.findById(id);
+    const item = await Item.findOne({ _id: id, userId: req.user.id });
     if (!item) return res.status(404).json({ message: 'Item not found' });
     res.json(item);
   } catch (error) {
@@ -200,7 +201,7 @@ export const searchItems = async (req, res) => {
 
     // ── Step 4: Fetch matched documents from MongoDB ─────────────────────
     console.log(`[API:Search] Fetching ${validIds.length} item(s) from MongoDB...`);
-    const items = await Item.find({ _id: { $in: validIds } });
+    const items = await Item.find({ _id: { $in: validIds }, userId: req.user.id });
 
     // ── Step 5: Apply boosts + sort by final score ───────────────────────
     // Parse a loose keyword set from the query to detect tag/topic overlap
@@ -272,7 +273,7 @@ export const getRelatedItems = async (req, res) => {
 
   try {
     // ── Step 1: Fetch the source item ────────────────────────────────────
-    const item = await Item.findById(id);
+    const item = await Item.findOne({ _id: id, userId: req.user.id });
     if (!item) {
       console.warn(`[API:Related] Item not found: ${id}`);
       return res.status(404).json({ message: 'Item not found.' });
@@ -322,7 +323,7 @@ export const getRelatedItems = async (req, res) => {
 
     // ── Step 5: Fetch related docs from MongoDB ──────────────────────────
     console.log(`[API:Related] Fetching ${validIds.length} related item(s) from MongoDB...`);
-    const relatedDocs = await Item.find({ _id: { $in: validIds } });
+    const relatedDocs = await Item.find({ _id: { $in: validIds }, userId: req.user.id });
 
     // ── Step 6: Apply boosts (shared tags, same topic) + sort ────────────
     const boostedItems = relatedDocs.map(relItem => {
@@ -388,7 +389,7 @@ export const getGraphData = async (req, res) => {
     const { limit = 50, topic, type } = req.query;
     
     // Construct filter based on query params
-    const filter = {};
+    const filter = { userId: req.user.id };
     if (topic) filter.topic = { $regex: topic, $options: 'i' };
     if (type) filter.type = type;
 
@@ -482,7 +483,7 @@ export const getGraphData = async (req, res) => {
 
 export const getClusters = async (req, res) => {
   try {
-    const items = await Item.find().sort({ createdAt: -1 });
+    const items = await Item.find({ userId: req.user.id }).sort({ createdAt: -1 });
 
     // Group items by topic
     const clusters = items.reduce((acc, item) => {
@@ -519,7 +520,7 @@ export const debugPinecone = async (req, res) => {
     // STEP 1: Fetch ALL MongoDB items using .lean() → plain JS objects
     // WHY lean()? Without it, Mongoose returns "MongooseDocument" objects
     // whose .embedding field is a MongooseArray wrapper, not a plain number[].
-    const allItems = await Item.find().select('_id title embedding tags').lean();
+    const allItems = await Item.find({ userId: req.user.id }).select('_id title embedding tags').lean();
     const totalMongo = allItems.length;
     const withEmbedding = allItems.filter(i => Array.isArray(i.embedding) && i.embedding.length > 0);
     const withoutEmbedding = allItems.filter(i => !Array.isArray(i.embedding) || i.embedding.length === 0);
@@ -752,6 +753,7 @@ export const getResurfaceItems = async (req, res) => {
     
     // 1. Fetch items older than the threshold
     let items = await Item.find({
+      userId: req.user.id,
       createdAt: { $lt: oldThreshold }
     }).select('title type createdAt tags url topic').lean();
 
@@ -762,6 +764,7 @@ export const getResurfaceItems = async (req, res) => {
       fallbackThreshold.setDate(fallbackThreshold.getDate() - 1);
       
       items = await Item.find({
+        userId: req.user.id,
         createdAt: { $lt: fallbackThreshold }
       }).select('title type createdAt tags url topic').lean();
     }
@@ -769,7 +772,7 @@ export const getResurfaceItems = async (req, res) => {
     // Strategy 3: Development / New User Fallback (Ensure results aren't empty for demo)
     if (items.length < 3) {
       console.log(`[API:Resurface] Still too few items. Fetching latest items just to avoid empty results.`);
-      items = await Item.find().sort({ createdAt: 1 }).limit(5).select('title type createdAt tags url topic').lean();
+      items = await Item.find({ userId: req.user.id }).sort({ createdAt: 1 }).limit(5).select('title type createdAt tags url topic').lean();
     }
     
     // If absolutely zero items exist in DB

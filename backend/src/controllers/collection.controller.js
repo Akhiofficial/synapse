@@ -9,12 +9,12 @@ export const createCollection = async (req, res) => {
             return res.status(400).json({ success: false, message: "Collection name is required" });
         }
 
-        const existingCollection = await Collection.findOne({ name });
+        const existingCollection = await Collection.findOne({ name, userId: req.user.id });
         if (existingCollection) {
             return res.status(400).json({ success: false, message: "Collection name already exists" });
         }
 
-        const collection = await Collection.create({ name });
+        const collection = await Collection.create({ name, userId: req.user.id });
 
         return res.status(201).json({
             success: true,
@@ -29,11 +29,11 @@ export const createCollection = async (req, res) => {
 
 export const getCollections = async (req, res) => {
     try {
-        const collections = await Collection.find().sort({ createdAt: -1 });
+        const collections = await Collection.find({ userId: req.user.id }).sort({ createdAt: -1 });
         
         // Optional: add count of items per collection
         const collectionsWithCounts = await Promise.all(collections.map(async (collection) => {
-            const count = await Item.countDocuments({ collectionId: collection._id });
+            const count = await Item.countDocuments({ collectionId: collection._id, userId: req.user.id });
             return {
                 ...collection.toObject(),
                 itemCount: count
@@ -60,12 +60,12 @@ export const addItemToCollection = async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        const collection = await Collection.findById(collectionId);
+        const collection = await Collection.findOne({ _id: collectionId, userId: req.user.id });
         if (!collection) {
             return res.status(404).json({ success: false, message: "Collection not found" });
         }
 
-        const item = await Item.findById(itemId);
+        const item = await Item.findOne({ _id: itemId, userId: req.user.id });
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found" });
         }
@@ -92,12 +92,12 @@ export const getCollectionItems = async (req, res) => {
     try {
         const collectionId = req.params.id;
 
-        const collection = await Collection.findById(collectionId);
+        const collection = await Collection.findOne({ _id: collectionId, userId: req.user.id });
         if (!collection) {
             return res.status(404).json({ success: false, message: "Collection not found" });
         }
 
-        const items = await Item.find({ collectionId }).sort({ createdAt: -1 });
+        const items = await Item.find({ collectionId, userId: req.user.id }).sort({ createdAt: -1 });
 
         return res.status(200).json({
             success: true,
@@ -119,7 +119,7 @@ export const removeItemFromCollection = async (req, res) => {
             return res.status(400).json({ success: false, message: "Item ID is required" });
         }
 
-        const item = await Item.findById(itemId);
+        const item = await Item.findOne({ _id: itemId, userId: req.user.id });
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found" });
         }
