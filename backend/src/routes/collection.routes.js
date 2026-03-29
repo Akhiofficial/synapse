@@ -6,14 +6,15 @@ import {
     getCollectionItems,
     removeItemFromCollection
 } from '../controllers/collection.controller.js';
+import identifyUser from '../middlewears/auth.middleware.js';
 
 const router = express.Router();
 
-router.post('/collections', createCollection);
-router.get('/collections', getCollections);
+router.post('/collections',identifyUser, createCollection);
+router.get('/collections',identifyUser, getCollections);
 
-router.post('/collections/:id/add', addItemToCollection);
-router.get('/collections/:id/items', getCollectionItems);
-router.post('/collections/:id/remove', removeItemFromCollection);
+router.post('/collections/:id/add',identifyUser, addItemToCollection);
+router.get('/collections/:id/items',identifyUser, getCollectionItems);
+router.post('/collections/:id/remove',identifyUser, removeItemFromCollection);
 
 export default router;

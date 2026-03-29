@@ -17,7 +17,7 @@ export const useSearch = () => {
     setError(null);
 
     try {
-      const response = await axios.get(`http://localhost:3000/api/search?query=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`/api/search?query=${encodeURIComponent(searchQuery)}`);
       setResults(response.data || []);
     } catch (err) {
       console.error('Search error:', err);

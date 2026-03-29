@@ -1,8 +1,10 @@
 import { NavLink } from 'react-router-dom';
 import { useDashboard } from '../hooks/useDashboard';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 const Sidebar = () => {
   const { setIsAddModalOpen } = useDashboard();
+  const { handleLogout } = useAuth();
   const navItems = [
     { label: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
     { label: 'Collections', icon: 'folder_open', path: '/collections' },
@@ -52,7 +54,7 @@ const Sidebar = () => {
           <span className="material-symbols-outlined text-sm">help</span>
           <span>Help</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-sm">logout</span>
           <span>Logout</span>
         </button>

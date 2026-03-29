@@ -57,6 +57,19 @@
     animation: float 6s ease-in-out infinite;
   }
 
+  .radial-glow {
+    background: radial-gradient(circle at center, rgba(255, 95, 31, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #FF6A00 0%, #FFB347 100%);
+    box-shadow: 0 0 20px rgba(255, 106, 0, 0.3);
+  }
+
+  .btn-gradient:hover {
+    box-shadow: 0 0 30px rgba(255, 106, 0, 0.5);
+  }
+
   /* Custom Scrollbar Hide */
   .scrollbar-hide {
     -ms-overflow-style: none;

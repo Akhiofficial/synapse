@@ -12,6 +12,7 @@ import {
   syncPinecone,
   getResurfaceItems
 } from '../controllers/item.controller.js';
+import identifyUser from '../middlewears/auth.middleware.js';
 
 const router = express.Router();
 
@@ -23,18 +24,18 @@ const upload = multer({
 });
 
 // Use upload.single('file') to handle multipart form data for PDF/Image
-router.post('/save', upload.single('file'), saveItem);
-router.get('/items', getAllItems);
-router.get('/item/:id', getItemById);
-router.get('/search', searchItems);
-router.get('/resurface', getResurfaceItems);
-router.get('/related/:id', getRelatedItems);
-router.get('/graph', getGraphData);
-router.get('/clusters', getClusters);
+router.post('/save',identifyUser, upload.single('file'), saveItem);
+router.get('/items',identifyUser, getAllItems);
+router.get('/item/:id',identifyUser, getItemById);
+router.get('/search',identifyUser, searchItems);
+router.get('/resurface',identifyUser, getResurfaceItems);
+router.get('/related/:id',identifyUser, getRelatedItems);
+router.get('/graph',identifyUser, getGraphData);
+router.get('/clusters',identifyUser, getClusters);
 
 // ── Diagnostic & Repair ──────────────────────────────────────────────────────
-router.get('/debug/pinecone', debugPinecone);   // inspect sync state
-router.post('/sync/pinecone', syncPinecone);    // re-upsert all items to Pinecone
+router.get('/debug/pinecone',debugPinecone);   // inspect sync state
+router.post('/sync/pinecone',syncPinecone);    // re-upsert all items to Pinecone
 
 
 export default router;

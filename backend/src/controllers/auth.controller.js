@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import * as authService from '../services/auth.service.js';
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -29,12 +29,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: 'Name, email, and password are required.' });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(409).json({ message: 'An account with this email already exists.' });
-    }
-
-    const user = await User.create({ name, email, password });
+    const user = await authService.registerUser(name, email, password);
     const token = generateToken(user._id);
     
     setTokenCookie(res, token);
@@ -49,7 +44,8 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth:Register] Error:', error);
-    return res.status(500).json({ message: 'Registration failed. Please try again.', error: error.message });
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message || 'Registration failed. Please try again.', error: error.message });
   }
 };
 
@@ -64,16 +60,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password.' });
-    }
-
+    const user = await authService.loginUser(email, password);
     const token = generateToken(user._id);
     
     setTokenCookie(res, token);
@@ -84,11 +71,13 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         createdAt: user.createdAt,
+        message: "Login successful"
       },
     });
   } catch (error) {
     console.error('[Auth:Login] Error:', error);
-    return res.status(500).json({ message: 'Login failed. Please try again.', error: error.message });
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message || 'Login failed. Please try again.', error: error.message });
   }
 };
 
@@ -109,10 +98,7 @@ export const logoutUser = async (req, res) => {
 export const getCurrentUser = async (req, res) => {
   try {
     // req.user is set by the identifyUser middleware
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ message: 'User not found.' });
-    }
+    const user = await authService.getUserById(req.user.id);
     return res.status(200).json({
       user: {
         id: user._id,
@@ -123,6 +109,7 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.error('[Auth:Me] Error:', error);
-    return res.status(500).json({ message: 'Failed to fetch user.', error: error.message });
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message || 'Failed to fetch user.', error: error.message });
   }
 };

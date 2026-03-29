@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Synapse - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-fixed": "#403f3f",
+                        "secondary": "#e5e2e1",
+                        "surface-dim": "#0e0e0e",
+                        "surface-container-high": "#201f1f",
+                        "secondary-dim": "#d6d4d3",
+                        "on-tertiary-container": "#442100",
+                        "primary-fixed-dim": "#fe5e1e",
+                        "tertiary": "#ff9f4a",
+                        "tertiary-container": "#fd8b00",
+                        "secondary-container": "#474746",
+                        "surface-tint": "#ff9069",
+                        "surface-container-low": "#131313",
+                        "on-secondary-container": "#d2d0cf",
+                        "on-primary": "#591800",
+                        "inverse-on-surface": "#565554",
+                        "surface-bright": "#2c2c2c",
+                        "error-container": "#9f0519",
+                        "primary": "#ff9069",
+                        "on-tertiary-fixed-variant": "#5a2e00",
+                        "inverse-surface": "#fcf8f8",
+                        "on-secondary": "#525151",
+                        "outline-variant": "#494847",
+                        "on-primary-container": "#451000",
+                        "surface-container-highest": "#262626",
+                        "secondary-fixed-dim": "#d6d4d3",
+                        "surface-container": "#1a1919",
+                        "primary-container": "#ff7948",
+                        "primary-fixed": "#ff7948",
+                        "outline": "#777575",
+                        "surface-container-lowest": "#000000",
+                        "inverse-primary": "#ac3600",
+                        "tertiary-fixed": "#ff9734",
+                        "background": "#0e0e0e",
+                        "secondary-fixed": "#e5e2e1",
+                        "on-primary-fixed-variant": "#551600",
+                        "on-error": "#490006",
+                        "on-error-container": "#ffa8a3",
+                        "tertiary-fixed-dim": "#f58600",
+                        "primary-dim": "#ff7441",
+                        "on-tertiary-fixed": "#291200",
+                        "error": "#ff716c",
+                        "surface": "#0e0e0e",
+                        "on-surface": "#ffffff",
+                        "tertiary-dim": "#ed8200",
+                        "on-primary-fixed": "#000000",
+                        "error-dim": "#d7383b",
+                        "on-background": "#ffffff",
+                        "on-surface-variant": "#adaaaa",
+                        "on-secondary-fixed-variant": "#5c5b5b",
+                        "surface-variant": "#262626",
+                        "on-tertiary": "#532a00"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Manrope"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(17, 17, 17, 0.7);
+            border: 1px solid rgba(34, 34, 34, 1);
+            backdrop-filter: blur(24px);
+        }
+        .radial-glow {
+            background: radial-gradient(circle at center, rgba(255, 95, 31, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #FF6A00 0%, #FFB347 100%);
+            box-shadow: 0 0 20px rgba(255, 106, 0, 0.3);
+        }
+        .btn-gradient:hover {
+            box-shadow: 0 0 30px rgba(255, 106, 0, 0.5);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container min-h-screen flex flex-col items-center justify-center relative">
+<!-- Ambient Background Glow -->
+<div class="fixed inset-0 radial-glow pointer-events-none z-0"></div>
+<!-- TopNavBar (Minimal version for transactional screen) -->
+<header class="fixed top-0 w-full z-50 flex justify-center items-center py-8 px-12 bg-transparent backdrop-blur-3xl no-line-rule tonal-transition">
+<div class="w-full max-w-7xl flex justify-start items-center">
+<span class="text-2xl font-bold text-brand-orange tracking-tighter font-['Space_Grotesk']">Synapse</span>
+</div>
+</header>
+<main class="z-10 w-full px-6 flex flex-col items-center justify-center pt-24 pb-12">
+<!-- Login Container -->
+<div class="glass-card w-full max-w-md rounded-lg p-10 flex flex-col items-center shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+<!-- Header -->
+<div class="text-center mb-10">
+<h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface mb-3">Welcome Back</h1>
+<p class="text-on-surface-variant text-sm font-body max-w-[280px] mx-auto leading-relaxed">Continue your journey into the neural network.</p>
+</div>
+<!-- Social Logins -->
+<div class="w-full grid grid-cols-2 gap-4 mb-8">
+<button class="flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-surface-container-high border border-outline-variant/20 hover:bg-surface-container-highest transition-all duration-300 group">
+<img alt="Google Logo" class="w-5 h-5" data-alt="minimalist google logo icon with vibrant colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXgEOUHu7eZvPZoqVjTtGwV2ch0yiI9aya-zwg7sJQTPV-jSpuzxRrXHFFEqDQAZNWwziH9UoJbrgeazzPUrN8hFi6sV3KUyc3-yQspJzUUh2A-XzwXiOo9AO2yXfMv9SqsoYuN-JonUdfT237xfJl7AfYdXM1v0EdkgbQrLEwS2hZQfBEgTO3QlMU5Imx83hmnQtPmJnIjT2YizFvuiUZwCIUhXqQL9Rcy62NEcIOfVb-4tv4Ejb4ipZCVM4rkoufQKZ3BLLZy3J6"/>
+<span class="text-xs font-label uppercase tracking-wider text-on-surface-variant group-hover:text-on-surface">Google</span>
+</button>
+<button class="flex items-center justify-center gap-2 py-3 px-4 rounded-full bg-surface-container-high border border-outline-variant/20 hover:bg-surface-container-highest transition-all duration-300 group">
+<img alt="GitHub Logo" class="w-5 h-5 invert" data-alt="minimalist github logo icon in white for dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdd4CCNSysjXqSZckU46dLqJ-rIBQHQ1jElizX7GtH6wYo1P0KaSLYJNkcGOnN_t-hY_n_mTfumAH0wdaB03qM7gTbJBbrxJnqWiXlK3WM_bo6NsT2apl8_PwEEfdh6V3nRL9z4b7_U0i7n5LFtsaFgJXwpQ2qxajr0ey_VhUSYQ-SJO-jffg7ATCJLcwRQmQumR9h9qj_vwdpDFfRpw9GDmZzj-mrXAXyBA7MsbnCG0DRj8DEi83fIwWAeJAUMuIu-vvp79ZxVLDz"/>
+<span class="text-xs font-label uppercase tracking-wider text-on-surface-variant group-hover:text-on-surface">GitHub</span>
+</button>
+</div>
+<div class="w-full flex items-center gap-4 mb-8">
+<div class="h-px flex-1 bg-outline-variant/10"></div>
+<span class="text-[10px] font-label uppercase tracking-[0.2em] text-on-surface-variant/40">OR EMAIL</span>
+<div class="h-px flex-1 bg-outline-variant/10"></div>
+</div>
+<!-- Form -->
+<form class="w-full space-y-6">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant ml-4">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 text-xl">alternate_email</span>
+<input class="w-full bg-surface-container-lowest border-transparent focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-full py-4 pl-12 pr-6 text-on-surface placeholder:text-on-surface-variant/30 font-body text-sm transition-all duration-300 outline-none" placeholder="neural@synapse.ai" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-4">
+<label class="block text-[10px] font-label uppercase tracking-widest text-on-surface-variant">Password</label>
+<a class="text-[10px] font-label uppercase tracking-widest text-primary/80 hover:text-primary transition-colors" href="#">Forgot?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50 text-xl">lock_open</span>
+<input class="w-full bg-surface-container-lowest border-transparent focus:border-primary/50 focus:ring-4 focus:ring-primary/10 rounded-full py-4 pl-12 pr-6 text-on-surface placeholder:text-on-surface-variant/30 font-body text-sm transition-all duration-300 outline-none" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="w-full btn-gradient py-4 rounded-full text-on-primary-fixed font-headline font-bold text-base tracking-tight hover:scale-[1.02] active:scale-95 transition-all duration-300 mt-4" type="submit">
+                    Sign In
+                </button>
+</form>
+<!-- Footer Link -->
+<div class="mt-8 text-center">
+<p class="text-sm font-body text-on-surface-variant">
+                    Don't have an account? 
+                    <a class="text-primary font-semibold hover:underline decoration-primary/30 underline-offset-4 ml-1 transition-all" href="#">Sign Up</a>
+</p>
+</div>
+</div>
+<!-- System Decorative Image -->
+<div class="mt-12 opacity-40 hover:opacity-100 transition-opacity duration-700">
+<div class="w-24 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent"></div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="fixed bottom-0 w-full flex justify-between items-center px-12 py-6 bg-transparent no-line-rule">
+<span class="font-['Inter'] text-[10px] uppercase tracking-[0.05em] text-zinc-600 opacity-80">© 2026 Synapse. Engineered Intelligence.</span>
+<div class="flex gap-6">
+<a class="font-['Inter'] text-[10px] uppercase tracking-[0.05em] text-zinc-600 hover:text-zinc-300 transition-colors" href="#">Privacy</a>
+<a class="font-['Inter'] text-[10px] uppercase tracking-[0.05em] text-zinc-600 hover:text-zinc-300 transition-colors" href="#">Terms</a>
+<a class="font-['Inter'] text-[10px] uppercase tracking-[0.05em] text-zinc-600 hover:text-zinc-300 transition-colors" href="#">Support</a>
+</div>
+</footer>
+<!-- Image for visual depth (Hidden, used for data-alt context) -->
+<div class="hidden">
+<img data-alt="abstract 3d visualization of a glowing neural network with orange fibers and bioluminescent data nodes on a dark void background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0L_bXd3pdpbmovL8Tg60WgO1KQbW6cXz9PNXITrxFxja1fVnnzas6tp3On2Sv_7qs3yWFOlm5AAEwJX6BBbnn0kagfhto1elMqkwKvoLpEdUWk06n53MeAArTTpesVJZP3OV6BjRBsoT2wXH25qfSw9icxmSxn-bEWJR4dzlHzuem6a2EQsycYXGRwMxH6iskyevRnWKCBSVWVBh8zM0jJljOAsc4EGgNkoPnJRj5uFqZ_UAEYkQ1my4sROJtEXsmIZ7EZgZRit1g"/>
+</div>
+</body></html>

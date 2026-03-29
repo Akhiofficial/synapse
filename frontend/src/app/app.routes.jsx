@@ -7,18 +7,26 @@ import SettingsPage from '../features/settings/pages/SettingsPage';
 import CollectionsPage from '../features/collections/pages/CollectionsPage';
 import SearchPage from '../features/search/pages/SearchPage';
 import ItemDetailPage from '../features/dashboard/pages/ItemDetailPage';
+import LoginPage from '../features/auth/pages/login';
+import SignupPage from '../features/auth/pages/signup';
+import { AuthProvider } from '../features/auth/store/auth.context';
+import ProtectedRoute from '../features/auth/components/ProtectedRoute';
 
 const AppRoutes = () => {
   return (
-    <Routes>
+    <AuthProvider>
+      <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
-      <Route path="/dashboard/item/:id" element={<ItemDetailPage />} />
-      <Route path="/collections" element={<CollectionsPage />} />
-      <Route path="/graph" element={<GraphPage />} />
-      <Route path="/search" element={<SearchPage />} />
-      <Route path="/settings" element={<SettingsPage />} />
-    </Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+      <Route path="/dashboard/item/:id" element={<ProtectedRoute><ItemDetailPage /></ProtectedRoute>} />
+      <Route path="/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
+      <Route path="/graph" element={<ProtectedRoute><GraphPage /></ProtectedRoute>} />
+      <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+      </Routes>
+    </AuthProvider>
   );
 };
 

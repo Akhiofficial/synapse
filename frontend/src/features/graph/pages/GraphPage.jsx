@@ -18,7 +18,7 @@ const GraphContent = () => {
   useEffect(() => {
     const fetchGraphData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/graph?limit=100');
+        const response = await axios.get('/api/graph?limit=100');
         setGraphData(response.data);
       } catch (err) {
         setError('Failed to sync neural connections.');
