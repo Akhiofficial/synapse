@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AetherBrain | Neural Graph</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Manrope:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-container": "#ff7948",
+              "tertiary-fixed-dim": "#f58600",
+              "on-secondary": "#525151",
+              "on-primary-fixed-variant": "#551600",
+              "on-surface": "#ffffff",
+              "surface-container-low": "#131313",
+              "on-secondary-fixed": "#403f3f",
+              "tertiary-dim": "#ed8200",
+              "secondary": "#e5e2e1",
+              "on-tertiary-fixed-variant": "#5a2e00",
+              "on-primary-fixed": "#000000",
+              "surface-container-lowest": "#000000",
+              "on-primary-container": "#451000",
+              "surface-container-high": "#201f1f",
+              "on-error": "#490006",
+              "secondary-dim": "#d6d4d3",
+              "primary-fixed-dim": "#fe5e1e",
+              "on-secondary-container": "#d2d0cf",
+              "surface-tint": "#ff9069",
+              "error-dim": "#d7383b",
+              "on-error-container": "#ffa8a3",
+              "surface": "#0e0e0e",
+              "primary-fixed": "#ff7948",
+              "inverse-primary": "#ac3600",
+              "surface-dim": "#0e0e0e",
+              "error-container": "#9f0519",
+              "secondary-container": "#474746",
+              "error": "#ff716c",
+              "surface-container": "#1a1919",
+              "inverse-on-surface": "#565554",
+              "on-tertiary": "#532a00",
+              "secondary-fixed": "#e5e2e1",
+              "on-tertiary-fixed": "#291200",
+              "inverse-surface": "#fcf8f8",
+              "background": "#0e0e0e",
+              "surface-container-highest": "#262626",
+              "surface-variant": "#262626",
+              "on-surface-variant": "#adaaaa",
+              "on-primary": "#591800",
+              "tertiary-fixed": "#ff9734",
+              "secondary-fixed-dim": "#d6d4d3",
+              "tertiary-container": "#fd8b00",
+              "on-secondary-fixed-variant": "#5c5b5b",
+              "outline-variant": "#494847",
+              "on-background": "#ffffff",
+              "primary": "#ff9069",
+              "primary-dim": "#ff7441",
+              "surface-bright": "#2c2c2c",
+              "outline": "#777575",
+              "tertiary": "#ff9f4a",
+              "on-tertiary-container": "#442100"
+            },
+            fontFamily: {
+              "headline": ["Space Grotesk"],
+              "body": ["Manrope"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Manrope', sans-serif;
+        }
+        .graph-gradient {
+            background: radial-gradient(circle at center, rgba(255, 121, 72, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+        }
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(40px);
+            border: 0.5px solid rgba(173, 170, 170, 0.1);
+        }
+        .node-glow {
+            filter: drop-shadow(0 0 8px rgba(255, 144, 105, 0.8));
+        }
+        .node-glow-lg {
+            filter: drop-shadow(0 0 15px rgba(255, 144, 105, 1));
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="text-on-surface selection:bg-primary/30">
+<!-- TopNavBar Component -->
+<header class="fixed top-0 w-full z-50 bg-neutral-950/60 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] h-20 flex justify-between items-center px-8 font-['Space_Grotesk'] tracking-tight">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-bold tracking-tighter text-orange-500">AetherBrain</span>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#">Nodes</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#">Atlas</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#">Vault</a>
+<a class="text-neutral-400 hover:text-neutral-200 transition-colors" href="#">Sync</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative hidden lg:block">
+<input class="bg-white/5 border-none rounded-full px-6 py-2 w-64 text-sm focus:ring-1 focus:ring-orange-500/50 transition-all placeholder:text-neutral-600" placeholder="Search Neural Graph..." type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="material-symbols-outlined text-neutral-400 hover:text-orange-500 transition-colors active:scale-95">settings</button>
+<button class="material-symbols-outlined text-neutral-400 hover:text-orange-500 transition-colors active:scale-95">notifications</button>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border border-white/10">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Modern minimalist portrait of a professional in soft studio lighting with a clean dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMwYo0bd7SPCCpOBYYItKtXSObUjpfe4xBxiKb44P8GlVupECEw21J9Bmn6nbzylIcbW_uQY4caaQSV4h2wSyzLFWquLB7MXQc4LGh0uviBfATwMUG6UAJcC9zLwA9KpWwrqcWodAhqVRfrPf5jTm61oqw_luOtrZAM9OEYjqlelMuTMO6Z2jU2zmCCQ2cAWjBp_8e-Ri11b96v4YJ2sbKhUeq1DXxqDuIGxR98mZLDU-E61tuzFqfsdEOELjFVfHvp_6eLrui4vzE"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar Component -->
+<aside class="fixed left-0 top-20 h-[calc(100vh-80px)] w-72 z-40 bg-neutral-900/40 backdrop-blur-2xl border-r border-white/5 shadow-2xl flex flex-col py-8 justify-between font-['Space_Grotesk'] text-sm uppercase tracking-widest">
+<div class="flex flex-col gap-2">
+<div class="px-6 mb-8 flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-500" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div>
+<h3 class="text-xs font-bold text-white tracking-widest">Neural Engine</h3>
+<p class="text-[10px] text-orange-500/70 font-label lowercase">Predictive Active</p>
+</div>
+</div>
+<a class="bg-orange-500/10 text-orange-400 border-r-4 border-orange-500 px-6 py-4 flex items-center gap-4 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span>Neural Graph</span>
+</a>
+<a class="text-neutral-500 px-6 py-4 flex items-center gap-4 hover:bg-white/5 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Time Capsule</span>
+</a>
+<a class="text-neutral-500 px-6 py-4 flex items-center gap-4 hover:bg-white/5 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">lan</span>
+<span>Data Ports</span>
+</a>
+<a class="text-neutral-500 px-6 py-4 flex items-center gap-4 hover:bg-white/5 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">manage_search</span>
+<span>Semantic Search</span>
+</a>
+<a class="text-neutral-500 px-6 py-4 flex items-center gap-4 hover:bg-white/5 hover:translate-x-1 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span>AI Insights</span>
+</a>
+<div class="mt-8 px-6">
+<button class="w-full bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold py-4 rounded-full shadow-[0_0_20px_rgba(255,144,105,0.3)] hover:scale-[1.02] transition-transform active:scale-95">
+                    Create Node
+                </button>
+</div>
+</div>
+<div class="flex flex-col gap-2">
+<a class="text-neutral-500 px-6 py-3 flex items-center gap-4 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Docs</span>
+</a>
+<a class="text-neutral-500 px-6 py-3 flex items-center gap-4 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span>Support</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="relative w-full h-screen bg-black overflow-hidden pt-20 pl-72">
+<div class="absolute inset-0 graph-gradient pointer-events-none"></div>
+<!-- Interactive Graph Mockup -->
+<div class="relative w-full h-full cursor-grab active:cursor-grabbing overflow-hidden">
+<!-- Simulated Connections (Edges) -->
+<svg class="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
+<line stroke="white" stroke-width="0.5" x1="45%" x2="55%" y1="40%" y2="60%"></line>
+<line stroke="white" stroke-width="0.5" x1="55%" x2="70%" y1="60%" y2="30%"></line>
+<line stroke="white" stroke-width="0.5" x1="70%" x2="45%" y1="30%" y2="40%"></line>
+<line stroke="white" stroke-width="0.5" x1="30%" x2="45%" y1="70%" y2="40%"></line>
+<line stroke="white" stroke-width="0.5" x1="60%" x2="70%" y1="15%" y2="30%"></line>
+<line stroke="white" stroke-width="0.5" x1="80%" x2="70%" y1="50%" y2="30%"></line>
+<line stroke="white" stroke-width="0.5" x1="55%" x2="35%" y1="60%" y2="30%"></line>
+<line stroke="white" stroke-width="0.5" x1="20%" x2="35%" y1="45%" y2="30%"></line>
+</svg>
+<!-- Nodes -->
+<div class="absolute top-[40%] left-[45%] w-6 h-6 bg-primary rounded-full node-glow-lg cursor-pointer hover:scale-125 transition-transform" title="Main Core"></div>
+<div class="absolute top-[60%] left-[55%] w-4 h-4 bg-primary-dim rounded-full node-glow cursor-pointer hover:scale-125 transition-transform" title="Architecture Hub"></div>
+<div class="absolute top-[30%] left-[70%] w-5 h-5 bg-primary rounded-full node-glow cursor-pointer hover:scale-125 transition-transform" title="Research Cluster"></div>
+<div class="absolute top-[70%] left-[30%] w-3 h-3 bg-orange-700/80 rounded-full cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute top-[15%] left-[60%] w-2 h-2 bg-orange-800/60 rounded-full cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute top-[50%] left-[80%] w-3 h-3 bg-orange-700/80 rounded-full cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute top-[30%] left-[35%] w-4 h-4 bg-primary rounded-full node-glow cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute top-[45%] left-[20%] w-2 h-2 bg-orange-800/60 rounded-full cursor-pointer hover:scale-125 transition-transform"></div>
+<div class="absolute top-[80%] left-[65%] w-2 h-2 bg-orange-800/60 rounded-full cursor-pointer hover:scale-125 transition-transform"></div>
+<!-- Tooltip Popup (Static for demo) -->
+<div class="absolute top-[40%] left-[45%] translate-x-8 -translate-y-8 glass-panel rounded-xl p-4 w-64 shadow-2xl z-20">
+<div class="flex justify-between items-start mb-2">
+<h4 class="font-headline font-bold text-white leading-tight">Neural Architecture Trends 2026</h4>
+<span class="material-symbols-outlined text-orange-500 text-sm">open_in_new</span>
+</div>
+<div class="flex gap-2 mb-3">
+<span class="text-[9px] font-label font-bold uppercase tracking-wider bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">#AI</span>
+<span class="text-[9px] font-label font-bold uppercase tracking-wider bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full border border-orange-500/20">#Research</span>
+</div>
+<p class="text-[11px] text-on-surface-variant line-clamp-2">Exploration of multi-modal synapse weighting and predictive latency in 2026 models.</p>
+</div>
+</div>
+<!-- Floating Control Panel -->
+<div class="absolute top-8 right-8 w-80 glass-panel rounded-2xl p-6 shadow-2xl z-30 flex flex-col gap-6">
+<div>
+<label class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant mb-3 block">Search Engine</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-lg">search</span>
+<input class="w-full bg-black/40 border border-white/5 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-orange-500/50 outline-none transition-all" placeholder="Locate node..." type="text"/>
+</div>
+</div>
+<div>
+<label class="text-[10px] font-label font-bold uppercase tracking-widest text-on-surface-variant mb-3 block">Filter Architecture</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-3 py-1.5 rounded-lg bg-orange-500 text-on-primary-container text-xs font-bold">#AI</button>
+<button class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 text-xs font-medium transition-colors">#Research</button>
+<button class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 text-xs font-medium transition-colors">#ProjectAlpha</button>
+<button class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-400 text-xs font-medium transition-colors">#Systems</button>
+</div>
+</div>
+<div class="flex items-center justify-between pt-4 border-t border-white/5">
+<span class="text-xs font-bold text-white uppercase tracking-widest">Clustering</span>
+<button class="w-10 h-5 bg-orange-500 rounded-full relative p-0.5 flex items-center transition-colors">
+<div class="absolute right-0.5 w-4 h-4 bg-white rounded-full shadow-lg"></div>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs font-bold text-neutral-500 uppercase tracking-widest">Labels</span>
+<button class="w-10 h-5 bg-neutral-800 rounded-full relative p-0.5 flex items-center transition-colors">
+<div class="absolute left-0.5 w-4 h-4 bg-neutral-600 rounded-full shadow-lg"></div>
+</button>
+</div>
+</div>
+<!-- Zoom Controls -->
+<div class="absolute bottom-16 right-8 flex flex-col gap-2 z-30">
+<button class="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="w-10 h-10 glass-panel rounded-full flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90">
+<span class="material-symbols-outlined">center_focus_weak</span>
+</button>
+</div>
+</main>
+<!-- BottomNavBar Component -->
+<footer class="fixed bottom-0 w-full z-50 h-10 bg-neutral-950/80 backdrop-blur-md border-t border-orange-500/20 flex justify-center items-center gap-12 px-10 font-['Inter'] text-[10px] uppercase tracking-[0.2em] font-bold">
+<div class="text-orange-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>System OK</span>
+</div>
+<div class="text-neutral-600 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">account_tree</span>
+<span>2.4k Nodes</span>
+</div>
+<div class="text-neutral-600 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">speed</span>
+<span>Latency 12ms</span>
+</div>
+<div class="text-neutral-600 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">bolt</span>
+<span>Uptime 99%</span>
+</div>
+</footer>
+</body></html>
