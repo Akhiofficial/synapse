@@ -69,7 +69,7 @@ const Hero = () => {
                    e.target.nextSibling.style.display = 'flex';
                 }}
               />
-              <div className="absolute inset-0  flex-col items-center justify-center text-center hidden">
+              <div className="absolute inset-0 flex-col items-center justify-center text-center hidden">
                  <div className="w-20 h-20 rounded-full bg-brand-orange/20 flex items-center justify-center mb-6">
                    <div className="w-4 h-4 bg-brand-orange rounded-full animate-ping" />
                  </div>

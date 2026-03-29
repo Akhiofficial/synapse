@@ -1,0 +1,60 @@
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+
+const Sidebar = () => {
+  const navItems = [
+    { label: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
+    { label: 'Collections', icon: 'folder_open', path: '/collections' },
+    { label: 'Graph', icon: 'account_tree', path: '/graph' },
+    { label: 'Search', icon: 'search', path: '/search' },
+    { label: 'Settings', icon: 'settings', path: '/settings' },
+  ];
+
+  return (
+    <aside className="fixed left-0 top-0 flex flex-col h-screen w-64 border-r border-white/10 bg-brand-black font-display tracking-tight z-50">
+      <div className="p-8">
+        <h1 className="text-2xl font-bold tracking-tighter text-white">Synapse</h1>
+        <p className="text-xs text-on-surface-variant mt-1 opacity-60">AI Second Brain</p>
+      </div>
+
+      <nav className="flex-1 px-4 space-y-2">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.label}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${
+                isActive
+                  ? 'bg-linear-to-r from-brand-orange/20 to-transparent text-brand-orange border-r-2 border-brand-orange'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`
+            }
+          >
+            <span className="material-symbols-outlined">{item.icon}</span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="p-6">
+        <button className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[0.98] transition-all active:scale-95">
+          <span className="material-symbols-outlined font-fill-1">add_circle</span>
+          New Memory
+        </button>
+      </div>
+
+      <div className="mt-auto p-4 border-t border-white/5 space-y-1">
+        <button className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-sm">help</span>
+          <span>Help</span>
+        </button>
+        <button className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+          <span className="material-symbols-outlined text-sm">logout</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;
