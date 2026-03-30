@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import HighlightTrigger from './HighlightTrigger';
 
 const ItemContent = ({ item, highlights, onAddHighlight }) => {
-  const { type, title, content, metadata, createdAt, tags } = item;
+  const { type, title, content, url, metadata, createdAt, tags } = item;
   const contentRef = useRef(null);
   const [selection, setSelection] = useState(null);
 
@@ -130,7 +130,7 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
           </div>
         </div>
 
-        <h1 className="font-display font-bold text-5xl md:text-6xl text-white leading-[1.1] tracking-tight max-w-4xl">
+        <h1 className="font-display font-bold text-5xl md:text-6xl text-white leading-[1.1] tracking-tight max-w-4xl wrap-break-words overflow-hidden">
           {title}
         </h1>
 
@@ -162,6 +162,10 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
         <div className="glass-card p-12 md:p-16 border border-white/5 relative overflow-hidden">
           {/* Content Body */}
           <div className="prose prose-invert prose-orange max-w-none">
+            <h2 className="text-brand-orange text-[10px] font-bold tracking-[0.3em] uppercase mb-8 flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm font-fill-1">psychology</span>
+              Neural Insight
+            </h2>
             <div className="text-xl md:text-2xl font-body leading-relaxed text-on-surface-variant font-light first-letter:text-5xl first-letter:font-display first-letter:font-bold first-letter:text-brand-orange first-letter:mr-3 first-letter:float-left whitespace-pre-wrap selection:bg-brand-orange/30">
               {renderContent()}
             </div>
@@ -178,17 +182,30 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
               </div>
             )}
             
-            {/* YouTube Embed Placeholder */}
-            {type === 'youtube' && (
-              <div className="my-12 aspect-video rounded-3xl overflow-hidden border border-white/10">
+            {/* YouTube Embed */}
+            {type === 'youtube' && metadata?.videoId && (
+              <div className="my-12 aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black group/yt relative">
                 <iframe 
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${metadata?.videoId}`} 
+                  className="w-full h-full relative z-10"
+                  src={`https://www.youtube.com/embed/${metadata.videoId}?autoplay=0&rel=0&modestbranding=1`} 
                   title="YouTube video player" 
                   frameBorder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                   allowFullScreen
                 ></iframe>
+                {/* Fallback overlay in case of embed restrictions */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-surface-container-lowest z-0">
+                  <span className="material-symbols-outlined text-5xl text-on-surface-variant/20 mb-4">play_circle</span>
+                  <p className="text-on-surface-variant text-sm mb-4">If the video fails to load, you can view it directly on YouTube</p>
+                  <a 
+                    href={url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-brand-orange text-xs font-bold tracking-widest uppercase hover:underline"
+                  >
+                    Open Original Source
+                  </a>
+                </div>
               </div>
             )}
           </div>

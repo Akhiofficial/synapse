@@ -36,8 +36,45 @@ export const useDashboard = () => {
     }
   }, [setLoading, setError, setResurfaceItems, setRecentItems]);
 
+  const createItem = useCallback(async (itemData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      Object.keys(itemData).forEach(key => {
+        if (itemData[key] !== undefined && itemData[key] !== null) {
+          formData.append(key, itemData[key]);
+        }
+      });
+      await dashboardApi.saveItem(formData);
+      await loadDashboardData();
+    } catch (err) {
+      console.error('Failed to create item:', err);
+      setError('Could not save your capture.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setError, loadDashboardData]);
+
+  const deleteItem = useCallback(async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await dashboardApi.deleteItem(id);
+      await loadDashboardData();
+    } catch (err) {
+      console.error('Failed to delete item:', err);
+      setError('Could not delete the item.');
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setError, loadDashboardData]);
+
   return {
     ...state,
     loadDashboardData,
+    createItem,
+    deleteItem,
   };
 };

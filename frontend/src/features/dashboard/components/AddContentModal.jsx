@@ -3,9 +3,58 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDashboard } from '../hooks/useDashboard';
 
 const AddContentModal = () => {
-  const { isAddModalOpen, setIsAddModalOpen } = useDashboard();
+  const { isAddModalOpen, setIsAddModalOpen, createItem } = useDashboard();
   const [activeTab, setActiveTab] = useState('URL');
   const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    url: '',
+    file: null,
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    setFormData(prev => ({ ...prev, file: e.target.files[0] }));
+  };
+
+  const getMappedType = (tab) => {
+    switch (tab) {
+      case 'URL': return 'article';
+      case 'Text': return 'text';
+      case 'Image Upload': return 'image';
+      case 'YouTube Link': return 'youtube';
+      case 'PDF Upload': return 'pdf';
+      default: return 'article';
+    }
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const type = getMappedType(activeTab);
+      const submissionData = {
+        type,
+        title: formData.title,
+        content: formData.content,
+        url: formData.url,
+        file: formData.file,
+      };
+
+      await createItem(submissionData);
+      setIsAddModalOpen(false);
+      // Reset form
+      setFormData({ title: '', content: '', url: '', file: null });
+    } catch (err) {
+      console.error('Submission failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tabs = [
     { label: 'URL', icon: 'link' },
@@ -78,6 +127,9 @@ const AddContentModal = () => {
                     <div className="relative group">
                       <input 
                         type="text" 
+                        name="url"
+                        value={formData.url}
+                        onChange={handleInputChange}
                         placeholder={activeTab === 'URL' ? "https://..." : "https://youtube.com/watch?v=..."}
                         className="w-full bg-brand-black/50 border border-white/10 rounded-2xl py-4 px-6 text-white focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/20 transition-all outline-hidden font-body"
                       />
@@ -89,6 +141,9 @@ const AddContentModal = () => {
                   <div className="space-y-3">
                     <label className="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant uppercase">Neural Text Content</label>
                     <textarea 
+                      name="content"
+                      value={formData.content}
+                      onChange={handleInputChange}
                       placeholder="Paste your thoughts or article text here..."
                       rows={6}
                       className="w-full bg-brand-black/50 border border-white/10 rounded-2xl py-4 px-6 text-white focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/20 transition-all outline-hidden font-body resize-none"
@@ -102,13 +157,20 @@ const AddContentModal = () => {
                       {activeTab === 'Image Upload' ? 'Image File' : 'PDF Document'}
                     </label>
                     <div className="border-2 border-dashed border-white/10 rounded-2xl p-10 bg-white/5 flex flex-col items-center justify-center group hover:border-brand-orange/30 transition-colors cursor-pointer relative overflow-hidden">
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" accept={activeTab === 'Image Upload' ? "image/*" : ".pdf"} />
+                      <input 
+                        type="file" 
+                        onChange={handleFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer" 
+                        accept={activeTab === 'Image Upload' ? "image/*" : ".pdf"} 
+                      />
                       <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <span className="material-symbols-outlined text-brand-orange">
                           {activeTab === 'Image Upload' ? 'upload_file' : 'picture_as_pdf'}
                         </span>
                       </div>
-                      <p className="text-sm text-white font-bold mb-1">Click to upload or drag and drop</p>
+                      <p className="text-sm text-white font-bold mb-1">
+                        {formData.file ? formData.file.name : 'Click to upload or drag and drop'}
+                      </p>
                       <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">
                         {activeTab === 'Image Upload' ? 'PNG, JPG or WEBP (MAX. 5MB)' : 'PDF (MAX. 10MB)'}
                       </p>
@@ -120,6 +182,9 @@ const AddContentModal = () => {
                   <label className="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant uppercase">Contextual Title (Optional)</label>
                   <input 
                     type="text" 
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
                     placeholder="Define this neural link"
                     className="w-full bg-brand-black/50 border border-white/10 rounded-2xl py-4 px-6 text-white focus:border-brand-orange/50 focus:ring-1 focus:ring-brand-orange/20 transition-all outline-hidden font-body"
                   />
@@ -146,8 +211,12 @@ const AddContentModal = () => {
                 </div>
                 
                 <div className="mt-8 flex justify-end">
-                  <button className="bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-5 px-10 rounded-2xl shadow-xl shadow-brand-orange/20 flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all">
-                    Save to Synapse
+                  <button 
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    className={`bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-5 px-10 rounded-2xl shadow-xl shadow-brand-orange/20 flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all ${loading ? 'opacity-50 cursor-not-allowed animate-pulse' : ''}`}
+                  >
+                    {loading ? 'Analyzing Content...' : 'Save to Synapse'}
                     <span className="material-symbols-outlined font-fill-1">auto_awesome</span>
                   </button>
                 </div>

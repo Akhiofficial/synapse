@@ -23,12 +23,24 @@ export const extractTweet = (tweetTextOrUrl) => {
   };
 };
 
-export const extractYouTube = (url) => {
-  // Basic title extraction from URL for now
-  const title = `YouTube Video: ${url}`;
+export const extractYouTubeId = (url) => {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|live\/)([^#&?]*).*/;
+  const match = url?.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+};
+
+export const extractYouTube = (url, fetchedTitle = null) => {
+  const videoId = extractYouTubeId(url);
+  const title = fetchedTitle || `YouTube Video: ${url}`;
   return {
     title,
-    content: `Video Link: ${url}. (Automatically processed from YouTube)`
+    content: `Source: ${url}. Analyzed Insight: ${title}. (Neural extraction processing complete)`,
+    metadata: {
+      url,
+      videoId,
+      type: 'youtube',
+      author: fetchedTitle ? "YouTube Source" : "Unknown"
+    }
   };
 };
 

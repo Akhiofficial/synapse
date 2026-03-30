@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDashboard } from '../hooks/useDashboard';
 
 const CaptureCard = ({ item }) => {
   const navigate = useNavigate();
+  const { deleteItem } = useDashboard();
   const { _id, title, type, content, tags, createdAt, metadata } = item;
 
   const getIcon = () => {
@@ -36,7 +38,13 @@ const CaptureCard = ({ item }) => {
           <button className="p-1 hover:text-white text-on-surface-variant transition-colors">
             <span className="material-symbols-outlined text-sm">open_in_new</span>
           </button>
-          <button className="p-1 hover:text-red-500 text-on-surface-variant transition-colors">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              if (window.confirm('Forget this memory?')) deleteItem(_id);
+            }}
+            className="p-1 hover:text-red-500 text-on-surface-variant transition-colors"
+          >
             <span className="material-symbols-outlined text-sm">delete</span>
           </button>
         </div>
@@ -58,9 +66,10 @@ const CaptureCard = ({ item }) => {
         {title}
       </h4>
       
-      {content && type !== 'code' && (
-        <p className="text-sm text-on-surface-variant line-clamp-2 mb-4 font-body">
-          {content}
+      {(metadata?.summary || content) && type !== 'code' && (
+        <p className="text-sm text-on-surface-variant line-clamp-3 mb-4 font-body leading-relaxed italic opacity-80">
+          <span className="material-symbols-outlined text-[10px] mr-1 align-middle text-brand-orange">auto_awesome</span>
+          {metadata?.summary || content}
         </p>
       )}
 

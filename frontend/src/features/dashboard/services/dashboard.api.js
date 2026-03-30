@@ -25,6 +25,18 @@ export const fetchRelatedItems = async (id) => {
   return response.data;
 };
 
+export const saveItem = async (formData) => {
+  const response = await api.post('/save', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return response.data;
+};
+
+export const deleteItem = async (id) => {
+  const response = await api.delete(`/item/${id}`);
+  return response.data;
+};
+
 // Highlights
 export const fetchHighlights = async (itemId) => {
   const response = await api.get(`/highlights/${itemId}`);

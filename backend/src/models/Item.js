@@ -37,6 +37,10 @@ const itemSchema = new mongoose.Schema({
     type: String,
     default: 'Uncategorized',
   },
+  metadata: {
+    type: Object,
+    default: {},
+  },
   createdAt: {
     type: Date,
     default: Date.now,
