@@ -11,7 +11,8 @@ import {
   debugPinecone,
   syncPinecone,
   getResurfaceItems,
-  deleteItem
+  deleteItem,
+  updateItem
 } from '../controllers/item.controller.js';
 import identifyUser from '../middlewears/auth.middleware.js';
 
@@ -28,6 +29,7 @@ const upload = multer({
 router.post('/save',identifyUser, upload.single('file'), saveItem);
 router.get('/items',identifyUser, getAllItems);
 router.get('/item/:id',identifyUser, getItemById);
+router.put('/item/:id',identifyUser, updateItem);
 router.delete('/item/:id',identifyUser, deleteItem);
 router.get('/search',identifyUser, searchItems);
 router.get('/resurface',identifyUser, getResurfaceItems);

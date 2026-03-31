@@ -25,6 +25,11 @@ export const fetchRelatedItems = async (id) => {
   return response.data;
 };
 
+export const updateItem = async (id, data) => {
+  const response = await api.put(`/item/${id}`, data);
+  return response.data;
+};
+
 export const saveItem = async (formData) => {
   const response = await api.post('/save', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

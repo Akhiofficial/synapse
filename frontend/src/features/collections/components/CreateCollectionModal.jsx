@@ -1,18 +1,51 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCollections } from '../store/CollectionsContext';
-import { dummyRecentCollectionItems } from '../services/collections.dummy';
 
 const CreateCollectionModal = () => {
-  const { isCreateCollectionModalOpen, setIsCreateCollectionModalOpen } = useCollections();
+  const { isCreateCollectionModalOpen, setIsCreateCollectionModalOpen, addCollection, recentItems } = useCollections();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleItem = (id) => {
     setSelectedItems(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
+  };
+
+  const handleCreate = async () => {
+    if (!name.trim() || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const { createCollection, addItemToCollection } = await import('../services/collections.api');
+      const data = await createCollection(name);
+      
+      if (data.success && data.collection) {
+        addCollection(data.collection);
+        
+        // Seed with selected items
+        if (selectedItems.length > 0) {
+          for (const itemId of selectedItems) {
+            // Skip dummy items
+            if (itemId.toString().length > 10) {
+              await addItemToCollection(data.collection._id, itemId).catch(console.error);
+            }
+          }
+        }
+        
+        setIsCreateCollectionModalOpen(false);
+        setName('');
+        setDescription('');
+        setSelectedItems([]);
+      }
+    } catch (err) {
+      console.error('Failed to create collection', err);
+      // Optional: show a toast error
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isCreateCollectionModalOpen) return null;
@@ -30,7 +63,6 @@ const CreateCollectionModal = () => {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           className="relative w-full max-w-4xl glass-card border border-white/20 shadow-2xl shadow-brand-orange/10 overflow-hidden flex flex-col max-h-[85vh]"
         >
-          {/* Close Button */}
           <button 
             onClick={() => setIsCreateCollectionModalOpen(false)}
             className="absolute top-6 right-6 p-2 text-on-surface-variant hover:text-white hover:bg-white/5 rounded-full transition-all z-10"
@@ -38,7 +70,6 @@ const CreateCollectionModal = () => {
             <span className="material-symbols-outlined">close</span>
           </button>
 
-          {/* Header */}
           <div className="p-8 md:p-10 pb-6">
             <h2 className="font-display text-4xl font-bold text-white mb-2 tracking-tight">Create Collection</h2>
             <p className="text-on-surface-variant text-sm font-body max-w-xl">
@@ -48,7 +79,6 @@ const CreateCollectionModal = () => {
 
           <div className="flex-1 overflow-y-auto px-8 md:px-10 pb-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Left Section: Details */}
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold tracking-[0.2em] text-brand-orange uppercase">Collection Name</label>
@@ -83,12 +113,11 @@ const CreateCollectionModal = () => {
                 </div>
               </div>
 
-              {/* Right Section: Neural Seeding (Item Selection) */}
               <div className="flex flex-col h-full border-l border-white/5 pl-10">
                 <label className="text-[10px] font-bold tracking-[0.2em] text-on-surface-variant uppercase mb-4">Seed with memories ({selectedItems.length})</label>
                 
                 <div className="flex-1 space-y-3 overflow-y-auto max-h-[350px] pr-2 [scrollbar-width:none]">
-                  {dummyRecentCollectionItems.map(item => (
+                  {recentItems.map(item => (
                     <div 
                       key={item.id}
                       onClick={() => toggleItem(item.id)}
@@ -114,10 +143,12 @@ const CreateCollectionModal = () => {
 
                 <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-4">
                    <button 
-                    className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-xl shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
+                    onClick={handleCreate}
+                    disabled={isSubmitting || !name.trim()}
+                    className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-xl shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Generate Neural Link
-                    <span className="material-symbols-outlined font-fill-1">hub</span>
+                    {isSubmitting ? 'Generating...' : 'Generate Neural Link'}
+                    {!isSubmitting && <span className="material-symbols-outlined font-fill-1">hub</span>}
                   </button>
                   <p className="text-[10px] text-on-surface-variant/60 font-medium">Synced with Predictive Engine v2.6</p>
                 </div>

@@ -13,19 +13,23 @@ const AddContentModal = () => {
     file: null,
   });
 
+  const [submitError, setSubmitError] = useState('');
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (submitError) setSubmitError('');
   };
 
   const handleFileChange = (e) => {
     setFormData(prev => ({ ...prev, file: e.target.files[0] }));
+    if (submitError) setSubmitError('');
   };
 
   const getMappedType = (tab) => {
     switch (tab) {
       case 'URL': return 'article';
-      case 'Text': return 'text';
+      case 'Text': return 'article';
       case 'Image Upload': return 'image';
       case 'YouTube Link': return 'youtube';
       case 'PDF Upload': return 'pdf';
@@ -33,8 +37,24 @@ const AddContentModal = () => {
     }
   };
 
+  const isFormValid = () => {
+    switch (activeTab) {
+      case 'URL':
+      case 'YouTube Link':
+        return !!formData.url.trim();
+      case 'Text':
+        return formData.content.trim().length >= 10;
+      case 'Image Upload':
+      case 'PDF Upload':
+        return !!formData.file;
+      default:
+        return false;
+    }
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
+    setSubmitError('');
     try {
       const type = getMappedType(activeTab);
       const submissionData = {
@@ -51,6 +71,7 @@ const AddContentModal = () => {
       setFormData({ title: '', content: '', url: '', file: null });
     } catch (err) {
       console.error('Submission failed:', err);
+      setSubmitError(err.response?.data?.message || err.message || 'An error occurred while uploading.');
     } finally {
       setLoading(false);
     }
@@ -87,12 +108,19 @@ const AddContentModal = () => {
             <span className="material-symbols-outlined">close</span>
           </button>
 
-          {/* Header */}
           <div className="p-8 md:p-12 pb-6">
             <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-2">Add Content</h2>
             <p className="text-on-surface-variant text-sm md:text-base font-body max-w-xl">
               Feed your digital consciousness. Upload documents, links, or text to expand your neural knowledge base.
             </p>
+
+            {/* Error Banner */}
+            {submitError && (
+              <div className="mt-4 flex gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl items-center">
+                <span className="material-symbols-outlined text-red-400 font-fill-1">error</span>
+                <p className="text-red-300 text-sm font-body font-medium">{submitError}</p>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-8 md:px-12 pb-12 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -213,8 +241,8 @@ const AddContentModal = () => {
                 <div className="mt-8 flex justify-end">
                   <button 
                     onClick={handleSubmit}
-                    disabled={loading}
-                    className={`bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-5 px-10 rounded-2xl shadow-xl shadow-brand-orange/20 flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all ${loading ? 'opacity-50 cursor-not-allowed animate-pulse' : ''}`}
+                    disabled={loading || !isFormValid()}
+                    className={`bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-5 px-10 rounded-2xl shadow-xl shadow-brand-orange/20 flex items-center gap-3 transition-all ${loading || !isFormValid() ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'} ${loading ? 'animate-pulse' : ''}`}
                   >
                     {loading ? 'Analyzing Content...' : 'Save to Synapse'}
                     <span className="material-symbols-outlined font-fill-1">auto_awesome</span>

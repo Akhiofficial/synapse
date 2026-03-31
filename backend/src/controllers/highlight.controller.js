@@ -21,7 +21,8 @@ export const addHighlight = async (req, res) => {
     }
 
     // Check for duplicate highlight
-    const existingHighlight = await Highlight.findOne({ itemId, userId: req.user.id, text: { $regex: new RegExp(`^${text.trim()}$`, "i") } });
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const existingHighlight = await Highlight.findOne({ itemId, userId: req.user.id, text: { $regex: new RegExp(`^${escapeRegex(text.trim())}$`, "i") } });
     if (existingHighlight) {
        return res.status(409).json({ error: "This exact highlight already exists for this item" });
     }

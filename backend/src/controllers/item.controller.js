@@ -30,13 +30,20 @@ export const saveItem = async (req, res) => {
     // Step 2: Content Type Handling & Extraction
     let extractedData = { title, content, metadata: {} };
 
+    if (type === 'image' && !file) {
+      return res.status(400).json({ message: 'Image file is required for Image Upload.' });
+    }
+    if (type === 'pdf' && !file) {
+      return res.status(400).json({ message: 'PDF file is required for PDF Upload.' });
+    }
+
     if (file) {
       if (file.mimetype === 'application/pdf') {
         type = 'pdf';
         extractedData = await extractPDF(file.buffer, file.originalname);
       } else if (file.mimetype.startsWith('image/')) {
         type = 'image';
-        extractedData = extractImage(file);
+        extractedData = await extractImage(file);
       }
     } else if (type === 'tweet') {
       extractedData = extractTweet(content || url);
@@ -125,7 +132,7 @@ export const saveItem = async (req, res) => {
     try {
       await pineconeIndex.upsert([{
         id: newItem._id.toString(),
-        values: embedding,
+        values: Array.from(embedding),
         metadata: {
           title: finalTitle,
           type,
@@ -181,6 +188,28 @@ export const getItemById = async (req, res) => {
   } catch (error) {
     console.error('[API:GetItem] Error:', error);
     res.status(500).json({ message: 'Error fetching item', error: error.message });
+  }
+};
+
+export const updateItem = async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid item ID format.' });
+  }
+
+  try {
+    const item = await Item.findOneAndUpdate(
+      { _id: id, userId: req.user.id },
+      { $set: updates },
+      { new: true }
+    );
+    if (!item) return res.status(404).json({ message: 'Item not found' });
+    res.json(item);
+  } catch (error) {
+    console.error('[API:UpdateItem] Error:', error);
+    res.status(500).json({ message: 'Error updating item', error: error.message });
   }
 };
 

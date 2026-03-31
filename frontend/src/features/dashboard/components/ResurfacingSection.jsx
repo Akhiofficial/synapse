@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ResurfacingSection = ({ items }) => {
+  const navigate = useNavigate();
   if (!items || items.length === 0) return null;
 
   return (
@@ -21,7 +23,11 @@ const ResurfacingSection = ({ items }) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {items.map((item) => (
-          <div key={item._id} className="glass-card p-6 flex gap-6 group hover:shadow-2xl hover:shadow-brand-orange/5 transition-all duration-500">
+          <div 
+            key={item._id} 
+            onClick={() => navigate(`/dashboard/item/${item._id}`)}
+            className="glass-card p-6 flex gap-6 group hover:shadow-2xl hover:shadow-brand-orange/5 transition-all duration-500 cursor-pointer"
+          >
             <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0 relative">
               <img 
                 src={item.metadata?.thumbnailUrl || 'https://lh3.googleusercontent.com/aida-public/AB6AXuDNJeIlzf0OL-GYxXf-meFH6pP1ftgkRZRusfBqqqEE1d3QSicdXYWqcyIFhvwIqs7H9-Bv6qP_ryyzvpDa7tZIcm5CUcvMNdQpLUslTPaUXGydiTYxBUG8UOFrI4NhXTKtbfF4_FLqpTgyTXV_ttg6pv5lUd0VANo49XtH9a3FXxS5fPZt7vEJffWcaW6ZGztuf674_RmQnG_11cgB678mHmYhAm9lE4qYhp3yTBtt-1pUjuJ2lzH96yclsNXQjs-B3hGPrV_RK3vS'}

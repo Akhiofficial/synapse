@@ -22,7 +22,8 @@ const ItemDetailContent = () => {
     loadItemDetail,
     addHighlight,
     removeHighlight,
-    editHighlight
+    editHighlight,
+    updateItemData
   } = useItemDetail();
 
   useEffect(() => {
@@ -82,7 +83,10 @@ const ItemDetailContent = () => {
               highlights={highlights}
               onAddHighlight={addHighlight}
             />
-            <PersonalSynthesis />
+            <PersonalSynthesis 
+              item={item} 
+              onUpdate={updateItemData} 
+            />
           </div>
 
           {/* Sidebar Column */}

@@ -171,7 +171,7 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
             </div>
             
             {/* Visual Assets if any */}
-            {(type === 'image' || metadata?.imageUrl) && (
+            {(type === 'image' || metadata?.imageUrl || metadata?.thumbnailUrl) && (metadata?.imageUrl || metadata?.thumbnailUrl) && (
               <div className="my-12 rounded-3xl overflow-hidden shadow-2xl shadow-black/40 border border-white/10 group/img relative">
                 <img 
                   src={metadata?.imageUrl || metadata?.thumbnailUrl} 

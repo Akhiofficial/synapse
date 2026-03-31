@@ -60,6 +60,18 @@ export const useItemDetail = () => {
     }
   };
 
+  const updateItemData = async (id, data) => {
+    try {
+      const { updateItem } = await import('../services/dashboard.api');
+      const updatedItem = await updateItem(id, data);
+      setItem(updatedItem);
+      return updatedItem;
+    } catch (err) {
+      console.error('Error updating item:', err);
+      throw err;
+    }
+  };
+
   const editHighlight = async (id, note) => {
     try {
       // Assuming api has an updateHighlight method (adding it now to api service just in case)
@@ -82,6 +94,7 @@ export const useItemDetail = () => {
     loadItemDetail,
     addHighlight,
     removeHighlight,
-    editHighlight
+    editHighlight,
+    updateItemData
   };
 };
