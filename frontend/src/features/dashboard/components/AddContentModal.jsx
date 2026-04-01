@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDashboard } from '../hooks/useDashboard';
+import { z } from 'zod';
 
 const AddContentModal = () => {
   const { isAddModalOpen, setIsAddModalOpen, createItem } = useDashboard();
@@ -37,24 +38,43 @@ const AddContentModal = () => {
     }
   };
 
+  const formSchema = z.discriminatedUnion("type", [
+    z.object({ type: z.literal("URL"), url: z.string().url("Please provide a valid URL starting with http:// or https://") }),
+    z.object({ type: z.literal("YouTube Link"), url: z.string().url("Please enter a valid YouTube URL") }),
+    z.object({ type: z.literal("Text"), content: z.string().min(10, "Text must be at least 10 characters long to process") }),
+    z.object({ type: z.literal("Image Upload"), file: z.instanceof(File, { message: "An image file is required" }) }),
+    z.object({ type: z.literal("PDF Upload"), file: z.instanceof(File, { message: "A PDF file is required" }) })
+  ]);
+
   const isFormValid = () => {
-    switch (activeTab) {
-      case 'URL':
-      case 'YouTube Link':
-        return !!formData.url.trim();
-      case 'Text':
-        return formData.content.trim().length >= 10;
-      case 'Image Upload':
-      case 'PDF Upload':
-        return !!formData.file;
-      default:
-        return false;
-    }
+    return formSchema.safeParse({
+      type: activeTab,
+      url: formData.url,
+      content: formData.content,
+      file: formData.file,
+    }).success;
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     setSubmitError('');
+
+    try {
+      // Zod validation
+      formSchema.parse({
+        type: activeTab,
+        url: formData.url,
+        content: formData.content,
+        file: formData.file,
+      });
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        setSubmitError(validationError.errors[0].message);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       const type = getMappedType(activeTab);
       const submissionData = {

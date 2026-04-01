@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import HighlightTrigger from './HighlightTrigger';
 
 const ItemContent = ({ item, highlights, onAddHighlight }) => {
@@ -65,14 +68,12 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
     window.getSelection().removeAllRanges();
   };
 
-  // Function to render content with highlights
-  const renderContent = useCallback(() => {
+  // Function to render content with highlights as markdown
+  const renderContentMarkdown = useCallback(() => {
     if (!content) return "No detailed content extracted yet. Sync with your synaptic processor to reveal the depth.";
     
     if (!highlights || highlights.length === 0) return content;
 
-    // Build a regex to match all highlighted texts
-    // We sort by length descending to handle overlapping highlights (naive approach)
     const sortedHighlights = [...highlights].sort((a, b) => b.text.length - a.text.length);
     let parts = [content];
 
@@ -87,19 +88,8 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
         const index = part.indexOf(h.text);
         if (index !== -1) {
           if (index > 0) newParts.push(part.substring(0, index));
-          newParts.push(
-            <mark 
-              key={`${h._id}-${index}`} 
-              className="bg-brand-orange/20 text-inherit border-b-2 border-brand-orange/40 transition-all hover:bg-brand-orange/40 hover:border-brand-orange cursor-pointer px-1 rounded-sm relative group/highlight"
-            >
-              {h.text}
-              {h.note && (
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-brand-black/90 backdrop-blur-md border border-white/10 rounded-lg text-[10px] text-white/80 opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
-                  {h.note}
-                </span>
-              )}
-            </mark>
-          );
+          // Use a custom HTML tag to pass note info as well
+          newParts.push(`<mark class="highlight-node" data-note="${h.note || ''}">${h.text}</mark>`);
           if (index + h.text.length < part.length) {
             newParts.push(part.substring(index + h.text.length));
           }
@@ -110,7 +100,7 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
       parts = newParts;
     });
 
-    return parts;
+    return parts.join('');
   }, [content, highlights]);
 
   return (
@@ -166,9 +156,31 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
               <span className="material-symbols-outlined text-sm font-fill-1">psychology</span>
               Neural Insight
             </h2>
-            <div className="text-xl md:text-2xl font-body leading-relaxed text-on-surface-variant font-light first-letter:text-5xl first-letter:font-display first-letter:font-bold first-letter:text-brand-orange first-letter:mr-3 first-letter:float-left whitespace-pre-wrap selection:bg-brand-orange/30">
-              {renderContent()}
+            <div className="text-lg md:text-xl font-body leading-relaxed text-on-surface-variant font-light selection:bg-brand-orange/30">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  mark: ({ node, ...props }) => (
+                    <mark 
+                      {...props} 
+                      className="bg-brand-orange/20 text-inherit border-b-2 border-brand-orange/40 transition-all hover:bg-brand-orange/40 hover:border-brand-orange cursor-pointer px-1 rounded-sm relative group/highlight"
+                    >
+                      {props.children}
+                      {props['data-note'] && (
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-brand-black/90 backdrop-blur-md border border-white/10 rounded-lg text-[10px] text-white/80 opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
+                          {props['data-note']}
+                        </span>
+                      )}
+                    </mark>
+                  ),
+                  p: ({ children }) => <p className="mb-6">{children}</p>,
+                }}
+              >
+                {renderContentMarkdown()}
+              </ReactMarkdown>
             </div>
+          </div>
             
             {/* Visual Assets if any */}
             {(type === 'image' || metadata?.imageUrl || metadata?.thumbnailUrl) && (metadata?.imageUrl || metadata?.thumbnailUrl) && (
@@ -214,7 +226,6 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/5 blur-[100px] rounded-full pointer-events-none -mr-48 -mt-48"></div>
         </div>
       </div>
-    </div>
   );
 };
 

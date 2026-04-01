@@ -61,7 +61,7 @@ export const saveItem = async (req, res) => {
       extractedData = extractYouTube(url, youtubeTitle);
     } else if (type === 'article' || type === 'text') {
       type = 'article';
-      extractedData = extractArticle(title, content);
+      extractedData = await extractArticle(title, content, url);
     }
 
     // Step 3: Content Normalization

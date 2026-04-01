@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCollections } from '../store/CollectionsContext';
+import { z } from 'zod';
 
 const CreateCollectionModal = () => {
   const { isCreateCollectionModalOpen, setIsCreateCollectionModalOpen, addCollection, recentItems } = useCollections();
@@ -8,6 +9,12 @@ const CreateCollectionModal = () => {
   const [description, setDescription] = useState('');
   const [selectedItems, setSelectedItems] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const collectionSchema = z.object({
+    name: z.string().min(3, "Collection name must be at least 3 characters long"),
+    description: z.string().max(200, "Description is too long (max 200 characters)").optional()
+  });
 
   const toggleItem = (id) => {
     setSelectedItems(prev =>
@@ -16,7 +23,18 @@ const CreateCollectionModal = () => {
   };
 
   const handleCreate = async () => {
-    if (!name.trim() || isSubmitting) return;
+    setError('');
+    
+    try {
+      collectionSchema.parse({ name, description });
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setError(err.errors[0].message);
+        return;
+      }
+    }
+
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       const { createCollection, addItemToCollection } = await import('../services/collections.api');
@@ -75,6 +93,14 @@ const CreateCollectionModal = () => {
             <p className="text-on-surface-variant text-sm font-body max-w-xl">
               Cluster your memories into a specialized neural index.
             </p>
+
+            {/* Error Banner */}
+            {error && (
+              <div className="mt-4 flex gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl items-center">
+                <span className="material-symbols-outlined text-red-400 font-fill-1">error</span>
+                <p className="text-red-300 text-sm font-body font-medium">{error}</p>
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto px-8 md:px-10 pb-10 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -144,7 +170,7 @@ const CreateCollectionModal = () => {
                 <div className="mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-4">
                    <button 
                     onClick={handleCreate}
-                    disabled={isSubmitting || !name.trim()}
+                    disabled={isSubmitting}
                     className="w-full bg-linear-to-br from-brand-orange to-orange-400 text-white font-bold py-4 rounded-xl shadow-xl shadow-brand-orange/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? 'Generating...' : 'Generate Neural Link'}

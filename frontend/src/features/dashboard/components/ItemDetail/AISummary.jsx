@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const AISummary = ({ summary }) => {
   return (
@@ -7,9 +9,13 @@ const AISummary = ({ summary }) => {
         <span className="material-symbols-outlined text-brand-orange text-xl">auto_awesome</span>
         AI Summary
       </h3>
-      <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-        {summary || "Our neural engine is still processing this insight. Check back shortly for a synthesized summary."}
-      </p>
+      <div className="text-on-surface-variant text-sm leading-relaxed font-body prose prose-invert prose-sm">
+        {summary ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{summary}</ReactMarkdown>
+        ) : (
+          <p>Our neural engine is still processing this insight. Check back shortly for a synthesized summary.</p>
+        )}
+      </div>
       
       <div className="mt-6 pt-4 border-t border-white/5">
         <button className="text-brand-orange text-[10px] font-bold tracking-widest uppercase hover:underline flex items-center gap-1 group">

@@ -1,15 +1,54 @@
 import { PDFParse } from 'pdf-parse';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import imagekit from './imagekit.js';
+import axios from 'axios';
 
 /**
  * Service to extract content from different types
  */
 
-export const extractArticle = (title, content) => {
+export const extractArticle = async (title, content, url) => {
+  if (content && content.trim().length > 0) {
+    return {
+      title: title || 'Untitled',
+      content: content.trim()
+    };
+  }
+
+  if (url) {
+    try {
+      console.log(`[Extractor] Fetching URL content for: ${url}`);
+      const response = await axios.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 15000 });
+      const html = response.data;
+      
+      let bodyText = html;
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      const extractedTitle = titleMatch ? titleMatch[1].trim() : (title || url);
+
+      bodyText = bodyText.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, ' ');
+      bodyText = bodyText.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, ' ');
+      bodyText = bodyText.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, ' ');
+      bodyText = bodyText.replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, ' ');
+      bodyText = bodyText.replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, ' ');
+      bodyText = bodyText.replace(/<[^>]+>/g, ' ');
+      bodyText = bodyText.replace(/\s+/g, ' ').trim();
+
+      return {
+        title: extractedTitle,
+        content: bodyText
+      };
+    } catch (err) {
+      console.error('[Extractor] URL Fetch Error:', err.message);
+      return {
+        title: title || 'Failed to fetch article',
+        content: `Could not retrieve content from ${url}. Please try summarizing manually or uploading a PDF. Error: ${err.message}`
+      };
+    }
+  }
+
   return {
     title: title || 'Untitled Article',
-    content: content || ''
+    content: ''
   };
 };
 
