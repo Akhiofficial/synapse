@@ -38,9 +38,10 @@ export const addHighlight = async (req, res) => {
     res.status(201).json(newHighlight);
   } catch (error) {
     if (error.name === 'ValidationError') {
+      console.warn(`[Highlight:Validation] ❌ 400 Error: ${error.message} | Payload:`, { itemId, textLength: text?.length });
       return res.status(400).json({ error: error.message });
     }
-    console.error("Error adding highlight:", error);
+    console.error(`[Highlight:Error] ❌ 500 Error:`, error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

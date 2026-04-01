@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Item from '../models/Item.js';
 import { generateEmbedding } from '../services/ai/embeddingGenerator.js';
-import { generateTags } from '../services/ai/tagGenerator.js';
+import { analyzeNeuralContent } from '../services/ai/neuralAnalysisService.js';
 import axios from 'axios';
 import { index as pineconeIndex } from '../config/pinecone.js';
 import { searchVectors } from '../services/ai/vectorSearch.js';
@@ -15,7 +15,6 @@ import {
 import { normalizeContent } from '../utils/contentNormalizer.js';
 import { runTopicClustering } from '../services/ai/clusteringService.js';
 import { cosineSimilarity } from '../utils/similarity.js';
-import { generateSummary, generateDetailedBreakdown, generateTitle } from '../services/ai/summaryGenerator.js';
 
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
@@ -65,15 +64,7 @@ export const saveItem = async (req, res) => {
     }
 
     // Step 3: Content Normalization
-    let finalTitle = extractedData.title || title || 'Untitled';
     const normalizedText = normalizeContent(extractedData.content || content);
-
-    // AI Title Generation if generic or URL
-    if (finalTitle.startsWith('http') || finalTitle.includes('YouTube Video:') || finalTitle === 'Untitled') {
-      console.log(`[API:Save] Generating AI Title...`);
-      finalTitle = await generateTitle(url, normalizedText);
-      console.log(`[API:Save] AI Title generated: ${finalTitle}`);
-    }
 
     // Step 7: Validation
     if (!normalizedText || normalizedText.length < 10) {
@@ -84,32 +75,45 @@ export const saveItem = async (req, res) => {
 
     console.log(`[API:Save] Extracted content length: ${normalizedText.length}`);
 
-    // Step 4: AI Processing Pipeline (Synchronous)
+    // Step 4: AI Processing Pipeline (Synchronous & Consolidated)
     console.log(`[API:Save] Starting AI processing pipeline...`);
 
-    // 1. Generate Tags
-    const tags = await generateTags(normalizedText);
-    console.log(`[API:Save] Tags generated: ${tags.join(', ')}`);
+    // 1. Perform Consolidated Neural Analysis (Title, Tags, Summary, Topic, Breakdown)
+    // If it's an image, we pass the image data for Vision analysis
+    let imageData = null;
+    if (type === 'image' && extractedData.metadata?.imageBuffer) {
+      imageData = { 
+        imageBuffer: extractedData.metadata.imageBuffer, 
+        mimeType: extractedData.metadata.mimeType 
+      };
+    }
 
-    // 2. Generate Embedding (Wait is already handled inside the generators)
+    const analysis = await analyzeNeuralContent(normalizedText, url || extractedData.url, type, imageData);
+
+    const finalTitle = analysis.title || extractedData.title || title || 'Untitled Synapse';
+    const tags = analysis.tags || [];
+    const summary = analysis.summary || "Synthesis unavailable.";
+    const topic = analysis.topic || "Uncategorized";
+    const detailedBreakdown = analysis.breakdown || normalizedText;
+
+    console.log(`[API:Save] Analysis successful: [Title: ${finalTitle}] [Topic: ${topic}] [Tags: ${tags.length}]`);
+
+    // 2. Generate Embedding (Still separate by design)
     const embedding = await generateEmbedding(normalizedText);
     console.log(`[API:Save] Embedding generated (Length: ${embedding.length})`);
 
-    // 3. Generate Summary (Neural Synthesis)
-    console.log(`[API:Save] Generating neural synthesis...`);
-    const summary = await generateSummary(normalizedText);
     const finalMetadata = { 
       ...(extractedData.metadata || {}), 
-      summary 
+      summary,
+      topic 
     };
-    console.log(`[API:Save] Synthesis complete.`);
 
-    // 4. Generate Detailed Content (Neural Narrative) if needed (e.g. for YouTube/PDF to have highlightable text)
+    // 3. Final Content Decision
     let finalContent = normalizedText;
-    if (type === 'youtube' || (type === 'pdf' && normalizedText.length < 500)) {
-       console.log(`[API:Save] Generating detailed neural narrative for ${type}...`);
-       finalContent = await generateDetailedBreakdown(normalizedText);
-       console.log(`[API:Save] Narrative generation complete.`);
+    // For images, PDFs (short content), and YouTube, we prefer the AI-generated breakdown
+    if (type === 'image' || type === 'youtube' || (type === 'pdf' && normalizedText.length < 500)) {
+       finalContent = detailedBreakdown;
+       console.log(`[API:Save] Neural narrative selected as final content for type: ${type}`);
     }
 
     // Step 5: Store Data in MongoDB
@@ -121,6 +125,7 @@ export const saveItem = async (req, res) => {
       url,
       collectionId,
       tags,
+      topic,
       embedding,
       metadata: finalMetadata
     });
@@ -128,21 +133,44 @@ export const saveItem = async (req, res) => {
     await newItem.save();
     console.log(`[API:Save] Item saved to MongoDB: ${newItem._id}`);
 
-    // Step 6: Pinecone Upsert
+    // Step 6: Pinecone Upsert (Using direct REST API to bypass SDK validation issues)
     try {
-      await pineconeIndex.upsert([{
-        id: newItem._id.toString(),
-        values: Array.from(embedding),
-        metadata: {
-          title: finalTitle,
-          type,
-          tags: tags.join(', ')
+      const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
+      const PINECONE_INDEX_NAME = process.env.PINECONE_INDEX_NAME;
+      
+      // 1. Get host URL
+      const describeRes = await axios.get(
+        `https://api.pinecone.io/indexes/${PINECONE_INDEX_NAME}`,
+        { headers: { 'Api-Key': PINECONE_API_KEY, 'X-Pinecone-API-Version': '2025-01' } }
+      );
+      const indexHost = describeRes.data.host;
+
+      // 2. Direct REST API upsert
+      await axios.post(
+        `https://${indexHost}/vectors/upsert`,
+        {
+          vectors: [{
+            id: newItem._id.toString(),
+            values: JSON.parse(JSON.stringify(embedding)), 
+            metadata: {
+              title: finalTitle,
+              type,
+              tags: tags.join(', '),
+              topic: topic
+            }
+          }]
+        },
+        {
+          headers: {
+            'Api-Key': PINECONE_API_KEY,
+            'Content-Type': 'application/json',
+            'X-Pinecone-API-Version': '2025-01'
+          }
         }
-      }]);
-      console.log(`[API:Save] Vector upserted to Pinecone`);
+      );
+      console.log(`[API:Save] Vector upserted to Pinecone via REST API`);
     } catch (pineconeError) {
-      console.error('[API:Save] Pinecone Upsert Error:', pineconeError);
-      // We don't fail the whole request if Pinecone fails, but we log it
+      console.error('[API:Save] Pinecone Upsert Error:', pineconeError.response?.data || pineconeError.message);
     }
 
     // Step 7: Trigger Topic Clustering (Asynchronous)

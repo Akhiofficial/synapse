@@ -16,12 +16,12 @@ const highlightSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      maxlength: 1000, 
+      maxlength: 10000, 
     },
     note: {
       type: String,
       trim: true,
-      maxlength: 1000, 
+      maxlength: 10000, 
     },
   },
   { timestamps: true }
