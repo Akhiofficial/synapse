@@ -2,7 +2,7 @@ import React from 'react';
 
 const Topbar = () => {
   return (
-    <header className="fixed top-0 right-0 left-64 h-16 flex justify-between items-center px-8 z-40 bg-brand-black/80 backdrop-blur-xl border-b border-white/5 font-display">
+    <header className="hidden md:flex fixed top-0 right-0 left-64 h-16 justify-between items-center px-8 z-40 bg-brand-black/80 backdrop-blur-xl border-b border-white/5 font-display">
       <div className="flex items-center gap-8 flex-1">
         <div className="relative w-full max-w-md group">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm group-focus-within:text-primary transition-colors">

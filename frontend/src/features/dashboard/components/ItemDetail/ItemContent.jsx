@@ -123,22 +123,22 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
           </div>
         </div>
 
-        <h1 className="font-display font-bold text-5xl md:text-6xl text-white leading-[1.1] tracking-tight max-w-4xl wrap-break-words overflow-hidden">
+        <h1 className="font-display font-bold text-3xl sm:text-5xl md:text-6xl text-white leading-[1.2] md:leading-[1.1] tracking-tight max-w-4xl wrap-break-word">
           {title}
         </h1>
 
-        <div className="flex flex-wrap items-center gap-6 text-[11px] font-label text-on-surface-variant uppercase tracking-widest">
+        <div className="flex flex-wrap items-center gap-4 md:gap-6 text-[10px] md:text-[11px] font-label text-on-surface-variant uppercase tracking-widest">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">calendar_month</span>
+            <span className="material-symbols-outlined text-[12px] md:text-sm">calendar_month</span>
             {formatDate(createdAt)}
           </div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">schedule</span>
+            <span className="material-symbols-outlined text-[12px] md:text-sm">schedule</span>
             {getReadTime(content)}
           </div>
           <div className="flex items-center gap-2 text-brand-orange">
-            <span className="material-symbols-outlined text-sm font-fill-1">auto_awesome</span>
-            Synthesized by Synapse
+            <span className="material-symbols-outlined text-[12px] md:text-sm font-fill-1">auto_awesome</span>
+            Synthesized
           </div>
         </div>
       </div>
@@ -152,14 +152,14 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
           containerRef={contentRef}
         />
 
-        <div className="glass-card p-12 md:p-16 border border-white/5 relative overflow-hidden">
+        <div className="glass-card p-6 md:p-16 border border-white/5 relative overflow-hidden">
           {/* Content Body */}
           <div className="prose prose-invert prose-orange max-w-none">
-            <h2 className="text-brand-orange text-[10px] font-bold tracking-[0.3em] uppercase mb-8 flex items-center gap-2">
+            <h2 className="text-brand-orange text-[10px] font-bold tracking-[0.3em] uppercase mb-6 md:mb-8 flex items-center gap-2">
               <span className="material-symbols-outlined text-sm font-fill-1">psychology</span>
               Neural Insight
             </h2>
-            <div className="text-lg md:text-xl font-body leading-relaxed text-on-surface-variant font-light selection:bg-brand-orange/30">
+            <div className="text-base md:text-xl font-body leading-relaxed text-on-surface-variant font-light selection:bg-brand-orange/30">
               {useMemo(() => (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
