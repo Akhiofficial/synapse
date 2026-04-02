@@ -30,9 +30,9 @@ const CaptureCard = ({ item }) => {
   return (
     <div 
       onClick={() => navigate(`/dashboard/item/${_id}`)}
-      className="glass-card p-5 mt-5 flex flex-col hover:bg-surface-container-high/60 transition-all duration-300 group cursor-pointer border border-transparent hover:border-brand-orange/20"
+      className="glass-card p-4 flex flex-col hover:bg-surface-container-high/60 transition-all duration-300 group cursor-pointer border border-transparent hover:border-brand-orange/20"
     >
-      <div className="flex justify-between items-start mb-4">
+      <div className="flex justify-between items-start mb-3">
         <span className="material-symbols-outlined text-brand-orange font-fill-1">{getIcon()}</span>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button className="p-1 hover:text-white text-on-surface-variant transition-colors">
@@ -51,7 +51,7 @@ const CaptureCard = ({ item }) => {
       </div>
 
       {type === 'image' && metadata?.imageUrl && (
-        <div className="h-40 -mx-5 -mt-2 mb-4 overflow-hidden">
+        <div className="h-32 -mx-4 -mt-1 mb-3 overflow-hidden">
           <img src={metadata.imageUrl} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         </div>
       )}
@@ -67,7 +67,7 @@ const CaptureCard = ({ item }) => {
       </h4>
       
       {(metadata?.summary || content) && type !== 'code' && (
-        <p className="text-sm text-on-surface-variant line-clamp-3 mb-4 font-body leading-relaxed italic opacity-80">
+        <p className="text-[13px] text-on-surface-variant line-clamp-2 mb-3 font-body leading-relaxed italic opacity-80">
           <span className="material-symbols-outlined text-[10px] mr-1 align-middle text-brand-orange">auto_awesome</span>
           {metadata?.summary || content}
         </p>
@@ -81,7 +81,7 @@ const CaptureCard = ({ item }) => {
         ))}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+      <div className="mt-3 pt-3 border-t border-white/5 flex justify-between items-center">
         <span className="text-[10px] font-label text-on-surface-variant">
           Capture: {getTimeAgo(createdAt)}
         </span>

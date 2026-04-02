@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -23,31 +23,34 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
     return `${Math.ceil(words / 200)} min read`;
   };
 
-  const handleMouseUp = () => {
-    const sel = window.getSelection();
-    if (sel.rangeCount > 0) {
-      const text = sel.toString().trim();
-      if (text && contentRef.current.contains(sel.anchorNode)) {
-        const range = sel.getRangeAt(0);
-        setSelection({ text, range });
-      } else {
+  const handleMouseUp = (e) => {
+    // Small timeout to allow browser to finish selection
+    setTimeout(() => {
+      const sel = window.getSelection();
+      if (sel.rangeCount > 0) {
+        const text = sel.toString();
+        // Check if text is non-empty and starts within our content container
+        if (text.trim() && contentRef.current?.contains(sel.anchorNode)) {
+          const range = sel.getRangeAt(0);
+          setSelection({ text: text.trim(), range });
+          return;
+        }
+      }
+      
+      // If we clicked outside or have no selection, clear it
+      // But don't clear if clicking an action button within the trigger
+      if (!e.target.closest('.highlight-trigger')) {
         setSelection(null);
       }
-    } else {
-      setSelection(null);
-    }
+    }, 10);
   };
 
-  // Clear selection on clicking outside
+  // Clear selection on clicking outside the container completely
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (selection && !e.target.closest('.highlight-trigger')) {
-        // We delay clearing to allow the trigger buttons to work
-        setTimeout(() => {
-          if (!window.getSelection().toString()) {
-            setSelection(null);
-          }
-        }, 100);
+      if (selection && !contentRef.current?.contains(e.target) && !e.target.closest('.highlight-trigger')) {
+        setSelection(null);
+        window.getSelection().removeAllRanges();
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -157,28 +160,30 @@ const ItemContent = ({ item, highlights, onAddHighlight }) => {
               Neural Insight
             </h2>
             <div className="text-lg md:text-xl font-body leading-relaxed text-on-surface-variant font-light selection:bg-brand-orange/30">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                rehypePlugins={[rehypeRaw]}
-                components={{
-                  mark: ({ node, ...props }) => (
-                    <mark 
-                      {...props} 
-                      className="bg-brand-orange/20 text-inherit border-b-2 border-brand-orange/40 transition-all hover:bg-brand-orange/40 hover:border-brand-orange cursor-pointer px-1 rounded-sm relative group/highlight"
-                    >
-                      {props.children}
-                      {props['data-note'] && (
-                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-brand-black/90 backdrop-blur-md border border-white/10 rounded-lg text-[10px] text-white/80 opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
-                          {props['data-note']}
-                        </span>
-                      )}
-                    </mark>
-                  ),
-                  p: ({ children }) => <p className="mb-6">{children}</p>,
-                }}
-              >
-                {renderContentMarkdown()}
-              </ReactMarkdown>
+              {useMemo(() => (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    mark: ({ node, ...props }) => (
+                      <mark 
+                        {...props} 
+                        className="bg-brand-orange/20 text-inherit border-b-2 border-brand-orange/40 transition-all hover:bg-brand-orange/40 hover:border-brand-orange cursor-pointer px-1 rounded-sm relative group/highlight"
+                      >
+                        {props.children}
+                        {props['data-note'] && (
+                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-brand-black/90 backdrop-blur-md border border-white/10 rounded-lg text-[10px] text-white/80 opacity-0 group-hover/highlight:opacity-100 transition-opacity pointer-events-none z-20 shadow-xl">
+                            {props['data-note']}
+                          </span>
+                        )}
+                      </mark>
+                    ),
+                    p: ({ children }) => <p className="mb-6">{children}</p>,
+                  }}
+                >
+                  {renderContentMarkdown()}
+                </ReactMarkdown>
+              ), [renderContentMarkdown])}
             </div>
           </div>
             

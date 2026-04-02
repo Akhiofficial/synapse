@@ -6,15 +6,32 @@ const HighlightTrigger = ({ selection, onHighlight, onAddNote, containerRef }) =
 
   useEffect(() => {
     if (selection && selection.text && selection.range) {
-      const rect = selection.range.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
-      
-      // Calculate position relative to container
-      setPosition({
-        top: rect.top - containerRect.top - 50, // 50px above the selection
-        left: rect.left - containerRect.left + (rect.width / 2)
-      });
-      setVisible(true);
+      try {
+        // Ensure range is still valid and has parts in the document
+        const range = selection.range;
+        if (!range.commonAncestorContainer || !document.contains(range.commonAncestorContainer)) {
+          setVisible(false);
+          return;
+        }
+
+        const rect = range.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) {
+          setVisible(false);
+          return;
+        }
+
+        const containerRect = containerRef.current.getBoundingClientRect();
+        
+        // Calculate position relative to container
+        setPosition({
+          top: rect.top - containerRect.top - 50, // 50px above the selection
+          left: rect.left - containerRect.left + (rect.width / 2)
+        });
+        setVisible(true);
+      } catch (err) {
+        console.error("Error calculating selection position:", err);
+        setVisible(false);
+      }
     } else {
       setVisible(false);
     }
