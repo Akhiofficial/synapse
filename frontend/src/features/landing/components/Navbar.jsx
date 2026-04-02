@@ -13,7 +13,7 @@ const Navbar = () => {
           <span className="text-2xl font-display font-bold text-white tracking-tight">Synapse</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-8 text-slate-300 font-medium absolute left-1/2 -translate-x-1/2">
+        <div className="hidden lg:flex items-center gap-8 text-slate-300 font-medium absolute left-1/2 -translate-x-1/2">
           <a href="#features" className="hover:text-brand-orange transition-colors">Product</a>
           <a href="#features" className="hover:text-brand-orange transition-colors">Features</a>
           <a href="#graph" className="hover:text-brand-orange transition-colors">Graph</a>
@@ -21,9 +21,9 @@ const Navbar = () => {
           <a href="#docs" className="hover:text-brand-orange transition-colors">Docs</a>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
           <Link to="/login" className="hidden sm:block text-slate-300 font-medium hover:text-white transition-colors">Login</Link>
-          <Link to="/signup" className="btn-primary">Get Started</Link>
+          <Link to="/signup" className="btn-primary px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base">Get Started</Link>
         </div>
       </div>
     </nav>

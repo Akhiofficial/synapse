@@ -14,6 +14,8 @@ export const useDashboard = () => {
     setRecentItems,
     setLoading,
     setError,
+    setFilter,
+    setLayout,
     ...state
   } = context;
 

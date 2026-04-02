@@ -2,21 +2,22 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../dashboard/components/Sidebar';
 import Topbar from '../../dashboard/components/Topbar';
+import MobileHeader from '../../dashboard/components/MobileHeader';
 import { DashboardProvider } from '../../dashboard/store/DashboardContext';
 import { CollectionsProvider } from '../../collections/store/CollectionsContext';
 
 const HelpSection = ({ title, icon, children, delay = "0ms" }) => (
   <div 
-    className="glass-card p-8 hover:bg-white/10 transition-all duration-500 group animate-slide-up"
+    className="glass-card p-6 md:p-8 hover:bg-white/10 transition-all duration-500 group animate-slide-up"
     style={{ animationDelay: delay }}
   >
-    <div className="flex items-start gap-6">
-      <div className="w-14 h-14 rounded-2xl bg-brand-orange/10 flex items-center justify-center border border-brand-orange/20 group-hover:scale-110 group-hover:bg-brand-orange/20 transition-all duration-500">
-        <span className="material-symbols-outlined text-brand-orange text-3xl font-fill-1">{icon}</span>
+    <div className="flex flex-col sm:flex-row items-start gap-4 md:gap-6">
+      <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-brand-orange/10 flex items-center justify-center border border-brand-orange/20 group-hover:scale-110 group-hover:bg-brand-orange/20 transition-all duration-500 shrink-0">
+        <span className="material-symbols-outlined text-brand-orange text-2xl md:text-3xl font-fill-1">{icon}</span>
       </div>
       <div className="flex-1">
-        <h3 className="text-xl font-display font-bold text-white mb-3 group-hover:text-brand-orange transition-colors">{title}</h3>
-        <div className="text-slate-400 leading-relaxed font-body text-sm space-y-4">
+        <h3 className="text-lg md:text-xl font-display font-bold text-white mb-3 group-hover:text-brand-orange transition-colors">{title}</h3>
+        <div className="text-slate-400 leading-relaxed font-body text-xs md:text-sm space-y-4">
           {children}
         </div>
       </div>
@@ -122,19 +123,20 @@ const HelpContent = () => {
   return (
     <div className="bg-brand-black min-h-screen">
       <Sidebar />
+      <MobileHeader />
       <Topbar />
-      <main className="ml-64 pt-24 px-8 pb-24 max-w-7xl mx-auto">
-        <header className="mb-16 animate-fade-in text-center relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-brand-orange/5 blur-[120px] rounded-full -z-10"></div>
-          <h1 className="text-5xl font-display font-bold mb-6 tracking-tight">
+      <main className="ml-0 md:ml-64 pt-20 md:pt-24 px-4 md:px-8 pb-24 max-w-7xl mx-auto transition-all duration-300">
+        <header className="mb-12 md:mb-16 animate-fade-in text-center relative px-4">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] h-[300px] bg-brand-orange/5 blur-[80px] md:blur-[120px] rounded-full -z-10"></div>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-4 md:mb-6 tracking-tight">
             Welcome to <span className="text-accent-gradient">Synapse</span> Help
           </h1>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto font-body leading-relaxed">
-            Master your digital second brain. Use this guide to explore the high-end capabilities of your neural network.
+          <p className="text-slate-400 text-base md:text-lg max-w-2xl mx-auto font-body leading-relaxed">
+            Master your digital second brain. Use this guide to explore the capabilities of your neural network.
           </p>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {features.map((feature, index) => (
             <HelpSection 
               key={index}
@@ -147,18 +149,18 @@ const HelpContent = () => {
           ))}
         </div>
 
-        <section className="mt-24 glass-card p-12 border-brand-orange/10 relative overflow-hidden group animate-slide-up" style={{ animationDelay: "700ms" }}>
+        <section className="mt-16 md:mt-24 glass-card p-8 md:p-12 border-brand-orange/10 relative overflow-hidden group animate-slide-up" style={{ animationDelay: "700ms" }}>
           <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-orange/5 blur-[100px] rounded-full -z-10 group-hover:bg-brand-orange/10 transition-all duration-700"></div>
           <div className="relative z-10 text-center max-w-3xl mx-auto">
-            <span className="material-symbols-outlined text-brand-orange text-5xl mb-6 font-fill-1 animate-float">info</span>
-            <h2 className="text-3xl font-display font-bold text-white mb-4">Ready to Amplify Your Mind?</h2>
-            <p className="text-slate-400 font-body mb-8">
-              Synapse isn't just a place to store data—it's an interactive partner that grows with your knowledge. Keep capturing, and the AI will get better at resurfacing exactly what you need, when you need it.
+            <span className="material-symbols-outlined text-brand-orange text-4xl md:text-5xl mb-6 font-fill-1 animate-float">info</span>
+            <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-4">Ready to Amplify Your Mind?</h2>
+            <p className="text-slate-400 font-body text-sm md:text-base mb-8">
+              Synapse isn't just a place to store data—it's an interactive partner that grows with your knowledge. Keep capturing, and the AI will get better at resurfacing exactly what you need.
             </p>
             <div className="flex justify-center gap-4">
               <button 
                 onClick={() => navigate('/dashboard')}
-                className="btn-primary flex items-center gap-2"
+                className="w-full sm:w-auto btn-primary flex items-center justify-center gap-2"
               >
                 <span className="material-symbols-outlined text-sm">rocket_launch</span>
                 Start Exploring
@@ -169,8 +171,8 @@ const HelpContent = () => {
       </main>
 
       {/* Decorative Glows */}
-      <div className="fixed top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full pointer-events-none z-[-1]"></div>
-      <div className="fixed bottom-[-10%] left-[20%] w-[400px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none z-[-1]"></div>
+      <div className="fixed top-[-10%] right-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-primary/10 blur-[80px] md:blur-[120px] rounded-full pointer-events-none z-[-1]"></div>
+      <div className="fixed bottom-[-10%] left-[20%] w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-primary/5 blur-[70px] md:blur-[100px] rounded-full pointer-events-none z-[-1]"></div>
     </div>
   );
 };

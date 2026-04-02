@@ -21,7 +21,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-6xl md:text-8xl font-display font-bold leading-[1.1] mb-10 max-w-5xl"
+          className="text-4xl sm:text-6xl md:text-8xl font-display font-bold leading-[1.2] md:leading-[1.1] mb-6 md:mb-10 max-w-5xl"
         >
           Synthesize the <span className="text-brand-orange">Singularity</span> <br />
           of Your Thought
@@ -31,7 +31,7 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-xl text-slate-400 max-w-3xl mb-12 leading-relaxed"
+          className="text-base md:text-xl text-slate-400 max-w-3xl mb-8 md:mb-12 leading-relaxed"
         >
           The first AI-powered second brain that doesn't just store your data—it understands it. 
           Connect articles, PDFs, tweets, and videos into a living neural map.
@@ -41,13 +41,13 @@ const Hero = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="flex flex-col sm:flex-row items-center gap-6 justify-center"
+          className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 justify-center w-full px-4 sm:px-0"
         >
-          <Link to="/signup" className="btn-primary h-14 px-10 text-lg flex items-center justify-center gap-3">
-            Get Started for Free <MousePointer2 className="w-5 h-5" />
+          <Link to="/signup" className="btn-primary h-12 md:h-14 px-8 md:px-10 text-base md:text-lg flex items-center justify-center gap-3 w-full sm:w-auto">
+            Get Started <span className="hidden sm:inline">for Free</span> <MousePointer2 className="w-5 h-5" />
           </Link>
-          <button className="btn-secondary h-14 px-10 text-lg flex items-center justify-center gap-3 bg-white/5 border-white/10 hover:bg-white/10">
-            <Play className="w-5 h-5 fill-current" /> Watch the Demo
+          <button className="btn-secondary h-12 md:h-14 px-8 md:px-10 text-base md:text-lg flex items-center justify-center gap-3 bg-white/5 border-white/10 hover:bg-white/10 w-full sm:w-auto">
+            <Play className="w-4 h-4 md:w-5 md:h-5 fill-current" /> <span className="sm:hidden">Watch</span> Demo
           </button>
         </motion.div>
         
@@ -56,10 +56,10 @@ const Hero = () => {
            initial={{ opacity: 0, y: 50, scale: 0.95 }}
            animate={{ opacity: 1, y: 0, scale: 1 }}
            transition={{ duration: 0.8, delay: 0.8 }}
-           className="mt-28 w-full max-w-6xl relative group"
+           className="mt-16 md:mt-28 w-full max-w-6xl relative group px-2 sm:px-4"
         >
-          <div className="absolute inset-0 bg-brand-orange/20 blur-[120px] -z-10 group-hover:bg-brand-orange/30 transition-colors duration-500" />
-          <div className="glass-card p-2 md:p-4 rotate-x-6">
+          <div className="absolute inset-0 bg-brand-orange/20 blur-[60px] md:blur-[120px] -z-10 group-hover:bg-brand-orange/30 transition-colors duration-500" />
+          <div className="glass-card p-2 md:p-4 rotate-x-0 md:rotate-x-6 transition-transform duration-700">
             <div className="rounded-xl overflow-hidden bg-[#080808] aspect-video border border-white/5 relative">
               <img 
                 src="https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzJjMDFhMTRkNzUzNzQyYmViOThkNTI5NDY2OWQ2NGExEgsSBxCd8qvRlxYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMTkyNzIwMDIxMDY2Mjk3NDg4MQ&filename=&opi=89354086" 
