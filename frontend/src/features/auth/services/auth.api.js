@@ -24,3 +24,13 @@ export const logoutApi = async () => {
     const response = await api.post('/logout');
     return response.data;
 };
+
+export const updateUserApi = async (data) => {
+    const response = await api.put('/me', data);
+    return response.data;
+};
+
+export const deleteUserApi = async () => {
+    const response = await api.delete('/me');
+    return response.data;
+};

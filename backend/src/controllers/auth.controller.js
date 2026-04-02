@@ -113,3 +113,44 @@ export const getCurrentUser = async (req, res) => {
     return res.status(statusCode).json({ message: error.message || 'Failed to fetch user.', error: error.message });
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUT /api/auth/me   (protected)
+// ─────────────────────────────────────────────────────────────────────────────
+export const updateCurrentUser = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const user = await authService.updateUser(req.user.id, { name });
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+      message: 'Profile updated successfully.'
+    });
+  } catch (error) {
+    console.error('[Auth:UpdateMe] Error:', error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message || 'Failed to update profile.', error: error.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DELETE /api/auth/me   (protected)
+// ─────────────────────────────────────────────────────────────────────────────
+export const deleteCurrentUser = async (req, res) => {
+  try {
+    await authService.deleteUser(req.user.userId);
+    res.cookie('token', '', {
+      httpOnly: true,
+      expires: new Date(0)
+    });
+    return res.status(200).json({ message: 'Account permanently deleted.' });
+  } catch (error) {
+    console.error('[Auth:DeleteMe] Error:', error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ message: error.message || 'Failed to delete account.', error: error.message });
+  }
+};

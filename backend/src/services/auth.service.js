@@ -36,3 +36,23 @@ export const getUserById = async (userId) => {
   }
   return user;
 };
+
+export const updateUser = async (userId, updateData) => {
+  const user = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true }).select('-password');
+  if (!user) {
+    const error = new Error('User not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+  return user;
+};
+
+export const deleteUser = async (userId) => {
+  const user = await User.findByIdAndDelete(userId);
+  if (!user) {
+    const error = new Error('User not found.');
+    error.statusCode = 404;
+    throw error;
+  }
+  return user;
+};
