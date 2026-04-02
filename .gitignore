@@ -11,6 +11,7 @@ frontend/.env
 # Build outputs
 dist/
 backend/dist/
+backend/public/
 frontend/dist/
 .next/
 out/
