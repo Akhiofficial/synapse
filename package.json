@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "Monolithic deployment for Synapse",
   "scripts": {
-    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "install:all": "npm install && npm run install:frontend && npm run install:backend",
+    "install:frontend": "cd frontend && npm install",
+    "install:backend": "cd backend && npm install",
     "build:frontend": "cd frontend && npm run build",
     "start": "cd backend && npm start",
-    "render:build": "npm install && npm run build:frontend && cd backend && npm install",
+    "render:build": "npm install && npm run install:frontend && npm run build:frontend && npm run install:backend",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev"
   },
