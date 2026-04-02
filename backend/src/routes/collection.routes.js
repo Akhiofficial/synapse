@@ -4,7 +4,9 @@ import {
     getCollections,
     addItemToCollection,
     getCollectionItems,
-    removeItemFromCollection
+    removeItemFromCollection,
+    updateCollection,
+    deleteCollection
 } from '../controllers/collection.controller.js';
 import identifyUser from '../middlewears/auth.middleware.js';
 
@@ -16,5 +18,8 @@ router.get('/collections',identifyUser, getCollections);
 router.post('/collections/:id/add',identifyUser, addItemToCollection);
 router.get('/collections/:id/items',identifyUser, getCollectionItems);
 router.post('/collections/:id/remove',identifyUser, removeItemFromCollection);
+
+router.put('/collections/:id', identifyUser, updateCollection);
+router.delete('/collections/:id', identifyUser, deleteCollection);
 
 export default router;

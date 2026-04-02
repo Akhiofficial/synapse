@@ -5,6 +5,7 @@ import DashboardPage from '../features/dashboard/pages/DashboardPage';
 import GraphPage from '../features/graph/pages/GraphPage';
 import SettingsPage from '../features/settings/pages/SettingsPage';
 import CollectionsPage from '../features/collections/pages/CollectionsPage';
+import CollectionDetailPage from '../features/collections/pages/CollectionDetailPage';
 import SearchPage from '../features/search/pages/SearchPage';
 import ItemDetailPage from '../features/dashboard/pages/ItemDetailPage';
 import LoginPage from '../features/auth/pages/login';
@@ -22,6 +23,7 @@ const AppRoutes = () => {
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/dashboard/item/:id" element={<ProtectedRoute><ItemDetailPage /></ProtectedRoute>} />
       <Route path="/collections" element={<ProtectedRoute><CollectionsPage /></ProtectedRoute>} />
+      <Route path="/collections/:id" element={<ProtectedRoute><CollectionDetailPage /></ProtectedRoute>} />
       <Route path="/graph" element={<ProtectedRoute><GraphPage /></ProtectedRoute>} />
       <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />

@@ -50,7 +50,8 @@ export const CollectionsProvider = ({ children }) => {
           type: item.type.toUpperCase(),
           timestamp: new Date(item.createdAt).toLocaleDateString(),
           thumbnail: item.metadata?.imageUrl || item.metadata?.thumbnailUrl || null,
-          tags: item.tags || []
+          tags: item.tags || [],
+          collectionId: item.collectionId
         }));
         setRecentItems(mappedItems);
       } else {
@@ -80,6 +81,57 @@ export const CollectionsProvider = ({ children }) => {
     }, ...prev]);
   };
 
+  const loadCollectionItems = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      const { fetchCollectionItems } = await import('../services/collections.api');
+      const data = await fetchCollectionItems(id);
+      return data;
+    } catch (err) {
+      console.error('Failed to load collection items:', err);
+      setError(err.message || 'Error loading collection items');
+      return { items: [], collection: '' };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const moveItemToCollection = async (itemId, collectionId) => {
+    try {
+      const { addItemToCollection } = await import('../services/collections.api');
+      await addItemToCollection(collectionId, itemId);
+      loadCollections(); // Refresh counts
+      return true;
+    } catch (err) {
+      console.error('Failed to move item:', err);
+      return false;
+    }
+  };
+
+  const deleteCollectionAction = async (id) => {
+    try {
+      const { deleteCollection } = await import('../services/collections.api');
+      await deleteCollection(id);
+      loadCollections();
+      return true;
+    } catch (err) {
+      console.error('Failed to delete collection:', err);
+      return false;
+    }
+  };
+
+  const updateCollectionAction = async (id, name) => {
+    try {
+      const { updateCollection } = await import('../services/collections.api');
+      await updateCollection(id, name);
+      loadCollections();
+      return true;
+    } catch (err) {
+      console.error('Failed to update collection:', err);
+      return false;
+    }
+  };
+
   const filterItems = async (type) => {
     try {
       const { fetchRecentItems } = await import('../../dashboard/services/dashboard.api');
@@ -98,7 +150,8 @@ export const CollectionsProvider = ({ children }) => {
         type: item.type.toUpperCase(),
         timestamp: new Date(item.createdAt).toLocaleDateString(),
         thumbnail: item.metadata?.imageUrl || item.metadata?.thumbnailUrl || null,
-        tags: item.tags || []
+        tags: item.tags || [],
+        collectionId: item.collectionId
       }));
       setRecentItems(mappedItems);
     } catch (e) {
@@ -115,8 +168,12 @@ export const CollectionsProvider = ({ children }) => {
     isCreateCollectionModalOpen,
     setIsCreateCollectionModalOpen,
     addCollection,
-    loadCollections
-  }), [collections, recentItems, loading, error, isCreateCollectionModalOpen, loadCollections]);
+    loadCollections,
+    loadCollectionItems,
+    moveItemToCollection,
+    deleteCollection: deleteCollectionAction,
+    updateCollection: updateCollectionAction
+  }), [collections, recentItems, loading, error, isCreateCollectionModalOpen, loadCollections, loadCollectionItems, moveItemToCollection]);
 
   return (
     <CollectionsContext.Provider value={value}>

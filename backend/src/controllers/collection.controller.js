@@ -142,3 +142,59 @@ export const removeItemFromCollection = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
+export const updateCollection = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body || {};
+
+        if (!name) {
+            return res.status(400).json({ success: false, message: "Collection name is required" });
+        }
+
+        const collection = await Collection.findOneAndUpdate(
+            { _id: id, userId: req.user.id },
+            { name },
+            { new: true }
+        );
+
+        if (!collection) {
+            return res.status(404).json({ success: false, message: "Collection not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            collection,
+            message: "Collection updated successfully"
+        });
+    } catch (error) {
+        console.error("Error updating collection:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
+
+export const deleteCollection = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const collection = await Collection.findOneAndDelete({ _id: id, userId: req.user.id });
+        
+        if (!collection) {
+            return res.status(404).json({ success: false, message: "Collection not found" });
+        }
+
+        // Unlink all items from this collection
+        await Item.updateMany(
+            { collectionId: id, userId: req.user.id },
+            { $set: { collectionId: null } }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Collection deleted successfully"
+        });
+    } catch (error) {
+        console.error("Error deleting collection:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};

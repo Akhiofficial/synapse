@@ -6,6 +6,7 @@ import CaptureCard from '../components/CaptureCard';
 import AddContentModal from '../components/AddContentModal';
 import { useDashboard } from '../hooks/useDashboard';
 import { DashboardProvider } from '../store/DashboardContext';
+import { CollectionsProvider } from '../../collections/store/CollectionsContext';
 
 const DashboardContent = () => {
   const { 
@@ -86,7 +87,9 @@ const DashboardContent = () => {
 
 const DashboardPage = () => (
   <DashboardProvider>
-    <DashboardContent />
+    <CollectionsProvider>
+      <DashboardContent />
+    </CollectionsProvider>
   </DashboardProvider>
 );
 
