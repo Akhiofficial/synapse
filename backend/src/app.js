@@ -36,7 +36,7 @@ const publicPath = path.join(__dirname, "../public");
 app.use(express.static(publicPath));
 
 // Catch-all route to serve the frontend index.html for any non-API route
-app.get("*", (req, res) => {
+app.get("*splat", (req, res) => {
     if (!req.path.startsWith("/api")) {
         res.sendFile(path.join(publicPath, "index.html"));
     }
