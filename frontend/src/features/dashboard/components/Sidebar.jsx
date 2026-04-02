@@ -50,10 +50,17 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-auto p-4 border-t border-white/5 space-y-1">
-        <button className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+        <NavLink 
+          to="/help"
+          className={({ isActive }) => 
+            `w-full flex items-center gap-3 px-4 py-2 text-xs transition-colors ${
+              isActive ? 'text-brand-orange bg-brand-orange/10 rounded-lg' : 'text-gray-500 hover:text-white'
+            }`
+          }
+        >
           <span className="material-symbols-outlined text-sm">help</span>
           <span>Help</span>
-        </button>
+        </NavLink>
         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 text-xs text-gray-500 hover:text-white transition-colors">
           <span className="material-symbols-outlined text-sm">logout</span>
           <span>Logout</span>
